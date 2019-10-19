@@ -1,0 +1,9 @@
+[package]
+name = "rrev"
+version = "0.1.0"
+authors = ["Matthew Delaney <matthew.l.delaney@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+capstone = "0.6.0"
+binload = { path = "./binload" }
