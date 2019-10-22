@@ -23,6 +23,13 @@ pub fn load_from_file(path: &str) {
         symbols: vec![]
     };
     println!("Read struct: {:#?}", ident);
+    if ident.ei_class == 1 {
+        let elf_header = elf::ELFHeader32::parse_from_buffer(&mut reader, ident);
+        println!("header32 - {:#?}", elf_header);
+    } else if ident.ei_class == 2 {
+        let elf_header = elf::ELFHeader64::parse_from_buffer(&mut reader, ident);
+        println!("header32 - {:#?}", elf_header);
+    }
 }
 
 #[cfg(test)]
