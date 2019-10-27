@@ -1,10 +1,8 @@
 mod elf;
 mod binary;
 
-//use std::io::prelude::*;
 use std::io::BufReader;
 use std::fs::File;
-//use crate::binary::Binary;
 
 
 pub fn load_from_file(path: &str) {
@@ -12,6 +10,18 @@ pub fn load_from_file(path: &str) {
     let mut reader = BufReader::new(f);
 
     let ident = elf::ELFIdent::parse_from_buffer(&mut reader);
+
+    println!("Read struct: \n{:#?}", ident);
+    match ident.ei_class {
+        elf::EI_CLASS::ELF32 => {
+            let elf_header = elf::ELFHeader32::parse_from_buffer(&mut reader, ident);
+            println!("header32\n{:#?}", elf_header);
+        }
+        elf::EI_CLASS::ELF64 => {
+            let elf_header = elf::ELFHeader64::parse_from_buffer(&mut reader, ident);
+            println!("header32\n{:#?}", elf_header);
+        }
+    };
 
     let binary = binary::Binary {
         filename: path.to_string(),
@@ -22,14 +32,7 @@ pub fn load_from_file(path: &str) {
         sections: vec![],
         symbols: vec![]
     };
-    println!("Read struct: {:#?}", ident);
-    if ident.ei_class == 1 {
-        let elf_header = elf::ELFHeader32::parse_from_buffer(&mut reader, ident);
-        println!("header32 - {:#?}", elf_header);
-    } else if ident.ei_class == 2 {
-        let elf_header = elf::ELFHeader64::parse_from_buffer(&mut reader, ident);
-        println!("header32 - {:#?}", elf_header);
-    }
+
 }
 
 #[cfg(test)]
