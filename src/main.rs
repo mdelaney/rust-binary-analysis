@@ -25,7 +25,7 @@ where
 }
 
 fn main() {
-    let mut cs = Capstone::new()
+    let cs = Capstone::new()
         .x86()
         .mode(arch::x86::ArchMode::Mode64)
         .syntax(arch::x86::ArchSyntax::Att)

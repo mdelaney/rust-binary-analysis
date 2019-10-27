@@ -13,25 +13,25 @@ pub fn load_from_file(path: &str) {
 
     println!("Read struct: \n{:#?}", ident);
     match ident.ei_class {
-        elf::EI_CLASS::ELF32 => {
+        elf::EiClass::ELF32 => {
             let elf_header = elf::ELFHeader32::parse_from_buffer(&mut reader, ident);
             println!("header32\n{:#?}", elf_header);
         }
-        elf::EI_CLASS::ELF64 => {
+        elf::EiClass::ELF64 => {
             let elf_header = elf::ELFHeader64::parse_from_buffer(&mut reader, ident);
             println!("header32\n{:#?}", elf_header);
         }
     };
 
-    let binary = binary::Binary {
-        filename: path.to_string(),
-        binary_type: binary::BinaryType::ELF,
-        arch: binary::Arch::UNKNOWN,
-        bits: 0,
-        entry_point: 0,
-        sections: vec![],
-        symbols: vec![]
-    };
+//    let binary = binary::Binary {
+//        filename: path.to_string(),
+//        binary_type: binary::BinaryType::ELF,
+//        arch: binary::Arch::UNKNOWN,
+//        bits: 0,
+//        entry_point: 0,
+//        sections: vec![],
+//        symbols: vec![]
+//    };
 
 }
 
