@@ -169,6 +169,23 @@ impl E_TYPE {
         }
     }
 }
+impl fmt::Display for E_TYPE {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let value: &str = match self {
+            E_TYPE::NONE => "NONE",
+            E_TYPE::REL => "Relocatable file (REL)",
+            E_TYPE::EXEC => "Executable file (EXEC)",
+            E_TYPE::DYN => "Shared object file (DYN)",
+            E_TYPE::CORE => "CORE",
+            E_TYPE::LOOS => "LOOS",
+            E_TYPE::HIOS => "HIOS",
+            E_TYPE::LOPROC => "LOPROC",
+            E_TYPE::HIPROC => "HIPROC",
+            E_TYPE::UNKNOWN => "Unknown",
+        };
+        write!(f, "{}", value)
+    }
+}
 
 #[derive(Debug)]
 pub enum E_MACHINE {
@@ -261,7 +278,7 @@ impl ELFHeader32 {
     }
 
     fn formatter(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "{:35}{:?}",    "Type:", self.e_type);
+        writeln!(f, "{:35}{:}",     "Type:", self.e_type);
         writeln!(f, "{:35}{:?}",    "Machine:", self.e_machine);
         writeln!(f, "{:35}{:?}",    "Version:", self.e_version);
         writeln!(f, "{:35}{:?}",    "Entry point address:", self.e_entry);
@@ -349,7 +366,7 @@ impl ELFHeader64 {
 
 
     fn formatter(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "{:35}{:?}",    "Type:", self.e_type);
+        writeln!(f, "{:35}{:}",     "Type:", self.e_type);
         writeln!(f, "{:35}{:?}",    "Machine:", self.e_machine);
         writeln!(f, "{:35}{:?}",    "Version:", self.e_version);
         writeln!(f, "{:35}{:?}",    "Entry point address:", self.e_entry);
