@@ -9,19 +9,7 @@ pub fn load_from_file(path: &str) {
     let f = File::open(path).unwrap();
     let mut reader = BufReader::new(f);
 
-    let ident = elf::ELFIdent::parse_from_buffer(&mut reader);
-
-    println!("Read struct: \n{:#?}", ident);
-    match ident.ei_class {
-        elf::EiClass::ELF32 => {
-            let elf_header = elf::ELFHeader32::parse_from_buffer(&mut reader, ident);
-            println!("header32\n{:#?}", elf_header);
-        }
-        elf::EiClass::ELF64 => {
-            let elf_header = elf::ELFHeader64::parse_from_buffer(&mut reader, ident);
-            println!("header32\n{:#?}", elf_header);
-        }
-    };
+    elf::load_elf_from_buffer(& mut reader);
 
 //    let binary = binary::Binary {
 //        filename: path.to_string(),
