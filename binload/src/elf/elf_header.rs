@@ -232,6 +232,7 @@ impl E_Machine {
 }
 
 pub struct ELFHeader {
+    pub ident: ELFIdent,
     pub e_type: E_Type,
     pub e_machine: E_Machine,
     pub e_version: u32,
@@ -273,6 +274,7 @@ impl ELFHeader {
         // files (given the numeric conversion is lossless)
         let result: ELFHeader = match ident.ei_class {
             EI_Class::ELF32 => ELFHeader {
+                ident: ident,
                 e_type: E_Type::from_u16(u16_from_bytes(raw[0..2].try_into().unwrap())),
                 e_machine: E_Machine::from_u16(u16_from_bytes(raw[2..4].try_into().unwrap())),
                 e_version: u32_from_bytes(raw[4..8].try_into().unwrap()),
@@ -288,6 +290,7 @@ impl ELFHeader {
                 e_shstrndx: u16_from_bytes(raw[34..36].try_into().unwrap()),
             },
             EI_Class::ELF64 => ELFHeader {
+                ident: ident,
                 e_type: E_Type::from_u16(u16_from_bytes(raw[0..2].try_into().unwrap())),
                 e_machine: E_Machine::from_u16(u16_from_bytes(raw[2..4].try_into().unwrap())),
                 e_version: u32_from_bytes(raw[4..8].try_into().unwrap()),

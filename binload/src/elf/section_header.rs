@@ -3,9 +3,9 @@
 
 use std::convert::TryInto;
 use std::fmt;
-use std::mem;
 
-use super::elf_header::{EI_Data, ELFIdent};
+use super::elf_header::{EI_Class, EI_Data, ELFHeader};
+use std::io::Read;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -102,7 +102,7 @@ impl SectionFlags {
     }
 }
 
-pub struct SectionHeader64 {
+pub struct SectionHeader {
     pub name: u32,                 // Offset to string in .shstrtab section
     pub section_type: SectionType, // Type of this header
     pub flags: SectionFlags,       // Attributes of the section u32 or u64
@@ -115,50 +115,71 @@ pub struct SectionHeader64 {
     pub entsize: u64, // Size in bytes of each entry for sections that contain fixed size entries, else 0 u32 or 64
 }
 
-impl SectionHeader64 {
-    pub fn parse_from_buffer<T: std::io::Read>(buffer: &mut T, ident: ELFIdent) -> SectionHeader64 {
+impl SectionHeader {
+    pub fn parse_from_buffer<T: std::io::Read>(
+        buffer: &mut T,
+        header: &ELFHeader,
+    ) -> SectionHeader {
         // First get the bytes for our header
-        const SIZE: usize = mem::size_of::<SectionHeader64>();
-        let mut raw: [u8; SIZE] = [0; SIZE];
-        buffer.read_exact(&mut raw).unwrap();
+        let mut raw: [u8; 128] = [0; 128];
+        let mut data = buffer.take(u64::from(header.e_shentsize));
+        //        buffer.read_exact(&mut raw).unwrap();
+        data.read(&mut raw).unwrap();
 
         // Now get our conversion functions to read numbers based on endianness
-        let u32_from_bytes = match ident.ei_data {
+        let u32_from_bytes = match header.ident.ei_data {
             EI_Data::LittleEndian => u32::from_le_bytes,
             EI_Data::BigEndian => u32::from_be_bytes,
         };
-        let u64_from_bytes = match ident.ei_data {
+        let u64_from_bytes = match header.ident.ei_data {
             EI_Data::LittleEndian => u64::from_le_bytes,
             EI_Data::BigEndian => u64::from_be_bytes,
         };
 
         // Finally we can create our header
-        let result = SectionHeader64 {
-            name: u32_from_bytes(raw[0..4].try_into().unwrap()),
-            section_type: SectionType::from_u32(u32_from_bytes(raw[4..8].try_into().unwrap())),
-            flags: SectionFlags::from_u64(u64_from_bytes(raw[8..16].try_into().unwrap())),
-            address: u64_from_bytes(raw[16..24].try_into().unwrap()),
-            offset: u64_from_bytes(raw[24..32].try_into().unwrap()),
-            size: u64_from_bytes(raw[32..40].try_into().unwrap()),
-            link: u32_from_bytes(raw[40..44].try_into().unwrap()),
-            info: u32_from_bytes(raw[44..48].try_into().unwrap()),
-            addralign: u64_from_bytes(raw[48..56].try_into().unwrap()),
-            entsize: u64_from_bytes(raw[56..64].try_into().unwrap()),
+        let result = match header.ident.ei_class {
+            EI_Class::ELF32 => SectionHeader {
+                name: u32_from_bytes(raw[0..4].try_into().unwrap()),
+                section_type: SectionType::from_u32(u32_from_bytes(raw[4..8].try_into().unwrap())),
+                flags: SectionFlags::from_u64(u64::from(u32_from_bytes(
+                    raw[8..12].try_into().unwrap(),
+                ))),
+                address: u64::from(u32_from_bytes(raw[12..16].try_into().unwrap())),
+                offset: u64::from(u32_from_bytes(raw[16..20].try_into().unwrap())),
+                size: u64::from(u32_from_bytes(raw[20..24].try_into().unwrap())),
+                link: u32_from_bytes(raw[24..28].try_into().unwrap()),
+                info: u32_from_bytes(raw[28..32].try_into().unwrap()),
+                addralign: u64::from(u32_from_bytes(raw[32..36].try_into().unwrap())),
+                entsize: u64::from(u32_from_bytes(raw[36..40].try_into().unwrap())),
+            },
+            EI_Class::ELF64 => SectionHeader {
+                name: u32_from_bytes(raw[0..4].try_into().unwrap()),
+                section_type: SectionType::from_u32(u32_from_bytes(raw[4..8].try_into().unwrap())),
+                flags: SectionFlags::from_u64(u64_from_bytes(raw[8..16].try_into().unwrap())),
+                address: u64_from_bytes(raw[16..24].try_into().unwrap()),
+                offset: u64_from_bytes(raw[24..32].try_into().unwrap()),
+                size: u64_from_bytes(raw[32..40].try_into().unwrap()),
+                link: u32_from_bytes(raw[40..44].try_into().unwrap()),
+                info: u32_from_bytes(raw[44..48].try_into().unwrap()),
+                addralign: u64_from_bytes(raw[48..56].try_into().unwrap()),
+                entsize: u64_from_bytes(raw[56..64].try_into().unwrap()),
+            },
         };
 
         result
     }
 
     fn formatter(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // TODO: implement section header formatter
-        // writeln!(f, "{:35}{:?} {}", "Start of section headers:", self.e_shoff, "(bytes into file)");
         let strings = [
             format!("{:15}{:?}", "Name Index:", self.name),
             format!("{:15}{:?}", "Type:", self.section_type),
             format!("{:15}{:?}", "Flags:", self.flags),
-            format!("{:15}{:?}", "Address:", self.address),
-            format!("{:15}{:?} {}", "Offset:", self.offset, "(bytes)"),
-            format!("{:15}{:?} {}", "Size:", self.size, "(bytes)"),
+            format!("{:15}0x{:x?}", "Address:", self.address),
+            format!("{:15}0x{:x?} {}", "Offset:", self.offset, "(bytes)"),
+            format!(
+                "{:15}0x{:x?} {:?} {}",
+                "Size:", self.size, self.size, "(bytes)"
+            ),
             format!("{:15}{:?}", "Link:", self.link),
             format!("{:15}{:?}", "Info:", self.info),
             format!("{:15}{:?}", "Address Align:", self.addralign),
@@ -168,13 +189,13 @@ impl SectionHeader64 {
     }
 }
 
-impl fmt::Display for SectionHeader64 {
+impl fmt::Display for SectionHeader {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.formatter(f)
     }
 }
 
-impl fmt::Debug for SectionHeader64 {
+impl fmt::Debug for SectionHeader {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.formatter(f)
     }
