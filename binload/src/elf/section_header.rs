@@ -75,37 +75,66 @@ pub enum SectionFlags {
     MaskProc,        // 0xf0000000 Processor specific
     Ordered,         // 0x40000000 Special ordering requirement (solaris)
     Exclude,         // 0x80000000 Section is excluded unless referenced or allocated (solaris)
-    Unknown,         // unknown
 }
 impl SectionFlags {
-    //    fn from_u32(value: u32) -> SECTION_FLAGS {
-    //        SECTION_FLAGS::from_u64(u64::from(value))
-    //    }
-    fn from_u64(value: u64) -> SectionFlags {
-        match value {
-            0x01 => SectionFlags::Write,
-            0x02 => SectionFlags::Alloc,
-            0x04 => SectionFlags::ExecInstr,
-            0x10 => SectionFlags::Merge,
-            0x20 => SectionFlags::Strings,
-            0x40 => SectionFlags::InfoLink,
-            0x80 => SectionFlags::LinkOrder,
-            0x100 => SectionFlags::OSNonconforming,
-            0x200 => SectionFlags::Group,
-            0x400 => SectionFlags::TLS,
-            0x0ff00000 => SectionFlags::MaskOS,
-            0xf0000000 => SectionFlags::MaskProc,
-            0x40000000 => SectionFlags::Ordered,
-            0x80000000 => SectionFlags::Exclude,
-            _ => SectionFlags::Unknown,
+    fn from_u32(value: u32) -> Vec<SectionFlags> {
+        SectionFlags::from_u64(u64::from(value))
+    }
+
+    // TODO: this could probably be simpler by simply iterating over a list of flags
+    //       and flag values and appending matches
+    fn from_u64(value: u64) -> Vec<SectionFlags> {
+        let mut flags: Vec<SectionFlags> = vec![];
+        if value & 0x01 != 0 {
+            flags.push(SectionFlags::Write);
         }
+        if value & 0x02 != 0 {
+            flags.push(SectionFlags::Alloc);
+        }
+        if value & 0x04 != 0 {
+            flags.push(SectionFlags::ExecInstr);
+        }
+        if value & 0x10 != 0 {
+            flags.push(SectionFlags::Merge);
+        }
+        if value & 0x20 != 0 {
+            flags.push(SectionFlags::Strings);
+        }
+        if value & 0x40 != 0 {
+            flags.push(SectionFlags::InfoLink);
+        }
+        if value & 0x80 != 0 {
+            flags.push(SectionFlags::LinkOrder);
+        }
+        if value & 0x100 != 0 {
+            flags.push(SectionFlags::OSNonconforming);
+        }
+        if value & 0x200 != 0 {
+            flags.push(SectionFlags::Group);
+        }
+        if value & 0x400 != 0 {
+            flags.push(SectionFlags::TLS);
+        }
+        if value & 0x0ff00000 != 0 {
+            flags.push(SectionFlags::MaskOS);
+        }
+        if value & 0xf0000000 != 0 {
+            flags.push(SectionFlags::MaskProc);
+        }
+        if value & 0x40000000 != 0 {
+            flags.push(SectionFlags::Ordered);
+        }
+        if value & 0x80000000 != 0 {
+            flags.push(SectionFlags::Exclude);
+        }
+        flags
     }
 }
 
 pub struct SectionHeader {
     pub name: u32,                 // Offset to string in .shstrtab section
     pub section_type: SectionType, // Type of this header
-    pub flags: SectionFlags,       // Attributes of the section u32 or u64
+    pub flags: Vec<SectionFlags>,  // Attributes of the section u32 or u64
     pub address: u64, // Virtual address of section in memory, for sections that are loaded u32 or u64
     pub offset: u64,  // Offset of the section in file u32 or u64
     pub size: u64,    // Size in bytes of the section u32 or u64
@@ -113,6 +142,8 @@ pub struct SectionHeader {
     pub info: u32,    // Extra info about the section
     pub addralign: u64, // Required alignment of the section (power of 2) u32 or 64
     pub entsize: u64, // Size in bytes of each entry for sections that contain fixed size entries, else 0 u32 or 64
+    pub data: Vec<u8>,
+    pub name_string: String,
 }
 
 impl SectionHeader {
@@ -151,6 +182,8 @@ impl SectionHeader {
                 info: u32_from_bytes(raw[28..32].try_into().unwrap()),
                 addralign: u64::from(u32_from_bytes(raw[32..36].try_into().unwrap())),
                 entsize: u64::from(u32_from_bytes(raw[36..40].try_into().unwrap())),
+                name_string: std::string::String::new(),
+                data: vec![],
             },
             EI_Class::ELF64 => SectionHeader {
                 name: u32_from_bytes(raw[0..4].try_into().unwrap()),
@@ -163,6 +196,8 @@ impl SectionHeader {
                 info: u32_from_bytes(raw[44..48].try_into().unwrap()),
                 addralign: u64_from_bytes(raw[48..56].try_into().unwrap()),
                 entsize: u64_from_bytes(raw[56..64].try_into().unwrap()),
+                name_string: std::string::String::new(),
+                data: vec![],
             },
         };
 
@@ -172,6 +207,7 @@ impl SectionHeader {
     fn formatter(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let strings = [
             format!("{:15}{:?}", "Name Index:", self.name),
+            format!("{:15}{:?}", "Name:", self.name_string),
             format!("{:15}{:?}", "Type:", self.section_type),
             format!("{:15}{:?}", "Flags:", self.flags),
             format!("{:15}0x{:x?}", "Address:", self.address),
