@@ -57,9 +57,36 @@ impl SectionType {
         }
     }
 }
+impl fmt::Display for SectionType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let value: &str = match self {
+            SectionType::Null => "Null",
+            SectionType::ProgBits => "ProgBits",
+            SectionType::SymTab => "SymTab",
+            SectionType::StrTab => "StrTab",
+            SectionType::Rela => "Rela",
+            SectionType::Hash => "Hash",
+            SectionType::Dynamic => "Dynamic",
+            SectionType::Note => "Note",
+            SectionType::NoBits => "NoBits",
+            SectionType::RelocationEnt => "Relocation",
+            SectionType::ShLib => "ShLib",
+            SectionType::DynSym => "DynSym",
+            SectionType::InitArray => "InitArray",
+            SectionType::FiniArray => "FiniArray",
+            SectionType::PreinitArray => "PreinitArray",
+            SectionType::Group => "Group",
+            SectionType::SymTabShNdx => "SymTabShNdx",
+            SectionType::Num => "Num",
+            SectionType::LOOS => "LOOS",
+            SectionType::Unknown => "Unknown",
+        };
+        write!(f, "{}", value)
+    }
+}
 
 #[allow(dead_code)]
-#[derive(Debug)]
+//#[derive(Debug)]
 pub enum SectionFlags {
     Write,           // 0x01 Writable
     Alloc,           // 0x02 Occupies memory during execution
@@ -128,6 +155,27 @@ impl SectionFlags {
             flags.push(SectionFlags::Exclude);
         }
         flags
+    }
+}
+impl fmt::Debug for SectionFlags {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let value: &str = match self {
+            SectionFlags::Write => "W",
+            SectionFlags::Alloc => "A",
+            SectionFlags::ExecInstr => "X",
+            SectionFlags::Merge => "M",
+            SectionFlags::Strings => "S",
+            SectionFlags::InfoLink => "I",
+            SectionFlags::LinkOrder => "L",
+            SectionFlags::OSNonconforming => "O",
+            SectionFlags::Group => "G",
+            SectionFlags::TLS => "T",
+            SectionFlags::MaskOS => "o",
+            SectionFlags::MaskProc => "p",
+            SectionFlags::Ordered => "o",
+            SectionFlags::Exclude => "E",
+        };
+        write!(f, "{}", value)
     }
 }
 
