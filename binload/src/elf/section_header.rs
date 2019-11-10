@@ -10,25 +10,38 @@ use std::io::Read;
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum SectionType {
-    Null,          // 0x00 Section header table entry unused
-    ProgBits,      // 0x01 Program data
-    SymTab,        // 0x02 Symbol table
-    StrTab,        // 0x03 String table
-    Rela,          // 0x04 Relocation entries with addends
-    Hash,          // 0x05 Symbol hash table
-    Dynamic,       // 0x06 Dynamic linking information
-    Note,          // 0x07 Notes
-    NoBits,        // 0x08 Program space with no data (bss)
-    RelocationEnt, // 0x09 Relocation entries, no addends
-    ShLib,         // 0x0a Reserved
-    DynSym,        // 0x0b Dynamic linker symbol table
-    InitArray,     // 0x0e Array of constructors
-    FiniArray,     // 0x0f Array of destructors
-    PreinitArray,  // 0x10 Array of pre-constructors
-    Group,         // 0x11 Section group
-    SymTabShNdx,   // 0x12 Extended section indices  SYMTAB_SHNDX
-    Num,           // 0x13 Number of defined types
-    LOOS,          // 0x60000000 Start OS-specific
+    Null,                // 0x00 Section header table entry unused
+    ProgBits,            // 0x01 Program data
+    SymTab,              // 0x02 Symbol table
+    StrTab,              // 0x03 String table
+    Rela,                // 0x04 Relocation entries with addends
+    Hash,                // 0x05 Symbol hash table
+    Dynamic,             // 0x06 Dynamic linking information
+    Note,                // 0x07 Notes
+    NoBits,              // 0x08 Program space with no data (bss)
+    RelocationEnt,       // 0x09 Relocation entries, no addends
+    ShLib,               // 0x0a Reserved
+    DynSym,              // 0x0b Dynamic linker symbol table
+    InitArray,           // 0x0e Array of constructors
+    FiniArray,           // 0x0f Array of destructors
+    PreinitArray,        // 0x10 Array of pre-constructors
+    Group,               // 0x11 Section group
+    SymTabShNdx,         // 0x12 Extended section indices  SYMTAB_SHNDX
+    Num,                 // 0x13 Number of defined types
+    OSSpecific,          // 0x60000000-0x6fffffff Start OS-specific
+    GNUAttributes,       // 0x6ffffff5 Object attributes.
+    GNUHash,             // 0x6ffffff6 GNU-style hash table.
+    GNULibList,          // 0x6ffffff7 Prelink library list
+    Checksum,            // 0x6ffffff8 Checksum for DSO content.
+    SunWMove,            // 0x6ffffffa
+    SunWCOMDAT,          // 0x6ffffffb
+    SunWSyminfo,         // 0x6ffffffc
+    GNUVersionDef,       // 0x6ffffffd Version definition section.
+    GNUVersionNeeds,     // 0x6ffffffe Version needs section.
+    GNUVersionSymTbl,    // 0x6fffffff Version symbol table.
+    ProcessorSpecific,   // 0x70000000-0x7fffffff processor-specific
+    ApplicationSpecific, // 0x80000000-0x8fffffff application-specific
+
     Unknown,
 }
 impl SectionType {
@@ -52,7 +65,19 @@ impl SectionType {
             0x11 => SectionType::Group,
             0x12 => SectionType::SymTabShNdx,
             0x13 => SectionType::Num,
-            0x60000000 => SectionType::LOOS,
+            0x6ffffff5 => SectionType::GNUAttributes,
+            0x6ffffff6 => SectionType::GNUHash,
+            0x6ffffff7 => SectionType::GNULibList,
+            0x6ffffff8 => SectionType::Checksum,
+            0x6ffffffa => SectionType::SunWMove,
+            0x6ffffffb => SectionType::SunWCOMDAT,
+            0x6ffffffc => SectionType::SunWSyminfo,
+            0x6ffffffd => SectionType::GNUVersionDef,
+            0x6ffffffe => SectionType::GNUVersionNeeds,
+            0x6fffffff => SectionType::GNUVersionSymTbl,
+            0x60000000..=0x6fffffff => SectionType::OSSpecific,
+            0x70000000..=0x7fffffff => SectionType::ProcessorSpecific,
+            0x80000000..=0x8fffffff => SectionType::ApplicationSpecific,
             _ => SectionType::Unknown,
         }
     }
@@ -78,7 +103,19 @@ impl fmt::Display for SectionType {
             SectionType::Group => "Group",
             SectionType::SymTabShNdx => "SymTabShNdx",
             SectionType::Num => "Num",
-            SectionType::LOOS => "LOOS",
+            SectionType::GNUAttributes => "GNU Object attributes",
+            SectionType::GNUHash => "GNU Hash table",
+            SectionType::GNULibList => "GNU Prelink library list",
+            SectionType::Checksum => "Checksum for DSO content",
+            SectionType::SunWMove => "SunWMove",
+            SectionType::SunWCOMDAT => "SunWCOMDAT",
+            SectionType::SunWSyminfo => "SunWsyminfo",
+            SectionType::GNUVersionDef => "GNU Version definition section",
+            SectionType::GNUVersionNeeds => "GNU needs section",
+            SectionType::GNUVersionSymTbl => "GNU Version symbol table",
+            SectionType::OSSpecific => "OS Specific",
+            SectionType::ProcessorSpecific => "Processor-specific",
+            SectionType::ApplicationSpecific => "Application-specific",
             SectionType::Unknown => "Unknown",
         };
         write!(f, "{}", value)

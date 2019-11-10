@@ -5,7 +5,7 @@ pub mod section_header;
 use std::io::SeekFrom;
 
 use program_header::ProgramHeader;
-use section_header::SectionHeader;
+use section_header::{SectionHeader, SectionType};
 
 fn get_null_terminated_string_from_vec(vec: &Vec<u8>, offset: usize) -> String {
     let mut length: usize = 0;
@@ -38,6 +38,9 @@ pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) {
 
     // get data for section headers
     for i in 0..elf_header.e_shnum as usize {
+        if let SectionType::NoBits = section_headers[i].section_type {
+            continue;
+        }
         buffer
             .seek(SeekFrom::Start(section_headers[i].offset))
             .unwrap();
@@ -71,12 +74,12 @@ pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) {
 fn get_section_headers_print_string(section_headers: &[SectionHeader]) -> String {
     let mut strings: Vec<String> = vec![];
     strings.push(format!(
-        "{:20} {:10} {:10} {:18} {:18} {:10} {:10} {:10} {:10} {:10}",
+        "{:15} {:15} {:10} {:18} {:18} {:10} {:10} {:10} {:10} {:10}",
         "Name", "Type", "Flags", "Address", "Offset", "Size", "Link", "Info", "Align", "Entsize",
     ));
     for i in section_headers {
         strings.push(format!(
-            "{:20} {:10} {:10} {:#018x} {:#018x} {:#010x} {:#010x} {:#010x} {:#010x} {:#010x}",
+            "{:15} {:15} {:10} {:#018x} {:#018x} {:#010x} {:#010x} {:#010x} {:#010x} {:#010x}",
             i.name_string,
             i.section_type.to_string(),
             format!("{:?}", i.flags),

@@ -1,5 +1,6 @@
 // TODO - remove allow dead code
 #![allow(dead_code)]
+#![allow(non_camel_case_types)]
 
 use std::convert::TryInto;
 use std::fmt;
@@ -10,15 +11,23 @@ use std::io::Read;
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum ProgramHeaderType {
-    Null,          // 0x00 Program header table entry unused
-    Load,          // 0x01 Loadable segment
-    Dynamic,       // 0x02 Dynamic linking information
-    Interp,        // 0x03 Interpreter information
-    Note,          // 0x04 Auxiliary information
-    ShLib,         // 0x05 Reserved
-    ProgramHeader, // 0x06 Segment containing the program header table
-    OS,            // 0x60000000 Start OS specific
-    PROC,          // 0x70000000 Start processor specific
+    Null,                   // 0x00 Program header table entry unused
+    Load,                   // 0x01 Loadable segment
+    Dynamic,                // 0x02 Dynamic linking information
+    Interp,                 // 0x03 Interpreter information
+    Note,                   // 0x04 Auxiliary information
+    ShLib,                  // 0x05 Reserved
+    ProgramHeader,          // 0x06 Segment containing the program header table
+    ThreadLocalStorage,     // 0x07 Thread-local storage segment
+    NumDefinedTypes,        // 0x08 Number of defined types
+    GNU_EH_Frame,           // 0x6474e550 GCC .eh_frame_hdr segment
+    GNU_Stack,              // 0x6474e551 Indicates stack executability
+    GNU_RO_AfterRelocation, // 0x6474e552 Read-only after relocation
+    SunWBSS,                // 0x6ffffffa Sun Specific segment
+    SunWStack,              // 0x6ffffffb Stack segment
+    SunWSpecific,           // 0x6ffffffa-0x6fffffff Sun specific
+    OS,                     // 0x60000000-0x6fffffff Start OS specific
+    PROC,                   // 0x70000000-0x7fffffff Start processor specific
     Unknown,
 }
 impl ProgramHeaderType {
@@ -31,6 +40,14 @@ impl ProgramHeaderType {
             0x04 => ProgramHeaderType::Note,
             0x05 => ProgramHeaderType::ShLib,
             0x06 => ProgramHeaderType::ProgramHeader,
+            0x07 => ProgramHeaderType::ThreadLocalStorage,
+            0x08 => ProgramHeaderType::NumDefinedTypes,
+            0x6474e550 => ProgramHeaderType::GNU_EH_Frame,
+            0x6474e551 => ProgramHeaderType::GNU_Stack,
+            0x6474e552 => ProgramHeaderType::GNU_RO_AfterRelocation,
+            0x6ffffffa => ProgramHeaderType::SunWBSS,
+            0x6ffffffb => ProgramHeaderType::SunWStack,
+            0x6ffffffa..=0x6fffffff => ProgramHeaderType::SunWSpecific,
             0x60000000..=0x6fffffff => ProgramHeaderType::OS,
             0x70000000..=0x7fffffff => ProgramHeaderType::PROC,
             _ => ProgramHeaderType::Unknown,
@@ -48,6 +65,14 @@ impl fmt::Display for ProgramHeaderType {
             ProgramHeaderType::Note => "Note",
             ProgramHeaderType::ShLib => "ShLib",
             ProgramHeaderType::ProgramHeader => "ProgramHeader",
+            ProgramHeaderType::ThreadLocalStorage => "Thread-local storage segment",
+            ProgramHeaderType::NumDefinedTypes => "Number of defined types",
+            ProgramHeaderType::GNU_EH_Frame => "GCC .eh_frame_hdr segment",
+            ProgramHeaderType::GNU_Stack => "Indicates stack executability",
+            ProgramHeaderType::GNU_RO_AfterRelocation => "Read-only after relocation",
+            ProgramHeaderType::SunWBSS => "Sun Specific segment",
+            ProgramHeaderType::SunWStack => "Stack segment",
+            ProgramHeaderType::SunWSpecific => "Sun specific",
             ProgramHeaderType::OS => "OS",
             ProgramHeaderType::PROC => "PROC",
             ProgramHeaderType::Unknown => "Unknown",

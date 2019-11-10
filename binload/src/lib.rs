@@ -32,6 +32,6 @@ mod tests {
 
     #[test]
     fn can_parse_elf_32() {
-        load_from_file("/home/mdelaney/infosec/reverse/crackmes/IOLI/bin-linux/crackme0x00")
+        //        load_from_file("/home/mdelaney/infosec/reverse/crackmes/IOLI/bin-linux/crackme0x00")
     }
 }
