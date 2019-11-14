@@ -2,12 +2,17 @@ pub mod elf_header;
 pub mod program_header;
 pub mod section_header;
 
-use std::io::SeekFrom;
-
 use program_header::ProgramHeader;
-use section_header::{SectionHeader, SectionType};
+use section_header::SectionHeader;
 
-fn get_null_terminated_string_from_vec(vec: &Vec<u8>, offset: usize) -> String {
+pub struct ELF {
+    pub elf_header: elf_header::ELFHeader,
+    pub program_headers: Vec<ProgramHeader>,
+    pub section_headers: Vec<SectionHeader>,
+    pub data: Vec<u8>,
+}
+
+fn get_null_terminated_string_from_vec<'a>(vec: &'a [u8], offset: usize) -> String {
     let mut length: usize = 0;
     for i in offset..vec.len() {
         if vec[i] == 0x00 {
@@ -22,46 +27,34 @@ fn get_null_terminated_string_from_vec(vec: &Vec<u8>, offset: usize) -> String {
     string
 }
 
-pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) {
+pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) -> ELF {
+    let mut data: Vec<u8> = vec![];
+    buffer.read_to_end(&mut data).unwrap();
+
     // First we get ELF headers
-    let ident = elf_header::ELFIdent::parse_from_buffer(buffer);
-    println!("Read struct: \n{:#?}", ident);
-    let elf_header = elf_header::ELFHeader::parse_from_buffer(buffer, ident);
+    let elf_ident = elf_header::ELFIdent::parse_from_buffer(&data);
+    println!("Read struct: \n{:#?}", elf_ident);
+    let elf_header = elf_header::ELFHeader::parse_from_buffer(&data, elf_ident);
     println!("header32\n{:#?}", elf_header);
 
     // Now we get section headers
     let mut section_headers: Vec<SectionHeader> = Vec::new();
-    buffer.seek(SeekFrom::Start(elf_header.e_shoff)).unwrap();
-    for _i in 0..elf_header.e_shnum {
-        section_headers.push(SectionHeader::parse_from_buffer(buffer, &elf_header));
-    }
-
-    // get data for section headers
-    for i in 0..elf_header.e_shnum as usize {
-        if let SectionType::NoBits = section_headers[i].section_type {
-            continue;
-        }
-        buffer
-            .seek(SeekFrom::Start(section_headers[i].offset))
-            .unwrap();
-        let mut data = vec![0; section_headers[i].size as usize];
-        buffer.read_exact(&mut data).unwrap();
-        section_headers[i].data = data;
+    for i in 0..elf_header.e_shnum {
+        section_headers.push(SectionHeader::parse_from_buffer(i, &data, &elf_header));
     }
 
     // get names for section headers
-    for i in 0..elf_header.e_shnum as usize {
-        section_headers[i].name_string = get_null_terminated_string_from_vec(
-            &section_headers[elf_header.e_shstrndx as usize].data,
-            section_headers[i].name as usize,
-        );
+    {
+        let name_data = section_headers[elf_header.e_shstrndx as usize].get_data(&data);
+        for sh in &mut section_headers {
+            sh.name_string = get_null_terminated_string_from_vec(&name_data, sh.name as usize);
+        }
     }
 
     // get program headers
     let mut program_headers: Vec<ProgramHeader> = Vec::new();
-    buffer.seek(SeekFrom::Start(elf_header.e_phoff)).unwrap();
-    for _ in 0..elf_header.e_phnum as usize {
-        program_headers.push(ProgramHeader::parse_from_buffer(buffer, &elf_header));
+    for i in 0..elf_header.e_phnum {
+        program_headers.push(ProgramHeader::parse_from_buffer(i, &data, &elf_header));
     }
     println!("Section Headers");
     println!("{}", get_section_headers_print_string(&section_headers));
@@ -69,6 +62,14 @@ pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) {
     println!("Program Headers");
     println!("{}", get_program_headers_print_string(&program_headers));
     println!();
+
+    // TODO: you are here - time to get ELF symbols!!
+    ELF {
+        elf_header,
+        program_headers,
+        section_headers,
+        data,
+    }
 }
 
 fn get_section_headers_print_string(section_headers: &[SectionHeader]) -> String {

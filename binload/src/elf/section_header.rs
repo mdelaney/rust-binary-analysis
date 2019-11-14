@@ -5,7 +5,6 @@ use std::convert::TryInto;
 use std::fmt;
 
 use super::elf_header::{EI_Class, EI_Data, ELFHeader};
-use std::io::Read;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -227,20 +226,21 @@ pub struct SectionHeader {
     pub info: u32,    // Extra info about the section
     pub addralign: u64, // Required alignment of the section (power of 2) u32 or 64
     pub entsize: u64, // Size in bytes of each entry for sections that contain fixed size entries, else 0 u32 or 64
-    pub data: Vec<u8>,
     pub name_string: String,
 }
 
 impl SectionHeader {
-    pub fn parse_from_buffer<T: std::io::Read>(
-        buffer: &mut T,
-        header: &ELFHeader,
-    ) -> SectionHeader {
+    pub fn get_data<'a>(&self, binary: &'a [u8]) -> &'a [u8] {
+        let start = self.offset as usize;
+        let end = start + self.size as usize;
+        &binary[start..end]
+    }
+
+    pub fn parse_from_buffer(index: u16, binary: &Vec<u8>, header: &ELFHeader) -> SectionHeader {
         // First get the bytes for our header
-        let mut raw: [u8; 128] = [0; 128];
-        let mut data = buffer.take(u64::from(header.e_shentsize));
-        //        buffer.read_exact(&mut raw).unwrap();
-        data.read(&mut raw).unwrap();
+        let start_index = header.e_shoff as usize + (index * header.e_shentsize) as usize;
+        let end_index = start_index + header.e_shentsize as usize;
+        let raw: &[u8] = &binary[start_index..end_index];
 
         // Now get our conversion functions to read numbers based on endianness
         let u32_from_bytes = match header.ident.ei_data {
@@ -268,7 +268,6 @@ impl SectionHeader {
                 addralign: u64::from(u32_from_bytes(raw[32..36].try_into().unwrap())),
                 entsize: u64::from(u32_from_bytes(raw[36..40].try_into().unwrap())),
                 name_string: std::string::String::new(),
-                data: vec![],
             },
             EI_Class::ELF64 => SectionHeader {
                 name: u32_from_bytes(raw[0..4].try_into().unwrap()),
@@ -282,7 +281,6 @@ impl SectionHeader {
                 addralign: u64_from_bytes(raw[48..56].try_into().unwrap()),
                 entsize: u64_from_bytes(raw[56..64].try_into().unwrap()),
                 name_string: std::string::String::new(),
-                data: vec![],
             },
         };
 

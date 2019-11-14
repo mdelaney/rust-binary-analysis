@@ -6,7 +6,6 @@ use std::convert::TryInto;
 use std::fmt;
 
 use super::elf_header::{EI_Class, EI_Data, ELFHeader};
-use std::io::Read;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -95,15 +94,11 @@ pub struct ProgramHeader {
 }
 
 impl ProgramHeader {
-    pub fn parse_from_buffer<T: std::io::Read>(
-        buffer: &mut T,
-        header: &ELFHeader,
-    ) -> ProgramHeader {
+    pub fn parse_from_buffer(index: u16, binary: &Vec<u8>, header: &ELFHeader) -> ProgramHeader {
         // First get the bytes for our header
-        let mut raw: [u8; 128] = [0; 128];
-        let mut data = buffer.take(u64::from(header.e_phentsize));
-        //        buffer.read_exact(&mut raw).unwrap();
-        data.read(&mut raw).unwrap();
+        let start_index = header.e_phoff as usize + (index * header.e_phentsize) as usize;
+        let end_index = start_index + header.e_phentsize as usize;
+        let raw: &[u8] = &binary[start_index..end_index];
 
         // Now get our conversion functions to read numbers based on endianness
         let u32_from_bytes = match header.ident.ei_data {

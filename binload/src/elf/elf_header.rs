@@ -101,10 +101,9 @@ pub struct ELFIdent {
 }
 
 impl ELFIdent {
-    pub fn parse_from_buffer<T: std::io::Read>(buffer: &mut T) -> ELFIdent {
+    pub fn parse_from_buffer(binary: &Vec<u8>) -> ELFIdent {
         const SIZE: usize = mem::size_of::<ELFIdent>();
-        let mut raw_ident: [u8; SIZE] = [0; SIZE];
-        buffer.read_exact(&mut raw_ident).unwrap();
+        let raw_ident: &[u8] = &binary[0..SIZE];
 
         let mut magic = [0; 4];
         magic.copy_from_slice(&raw_ident[0..4]);
@@ -333,11 +332,10 @@ pub struct ELFHeader {
 }
 
 impl ELFHeader {
-    pub fn parse_from_buffer<T: std::io::Read>(buffer: &mut T, ident: ELFIdent) -> ELFHeader {
+    pub fn parse_from_buffer(binary: &Vec<u8>, ident: ELFIdent) -> ELFHeader {
         // First get the bytes for our header
         const SIZE: usize = mem::size_of::<ELFHeader>();
-        let mut raw: [u8; SIZE] = [0; SIZE];
-        buffer.read_exact(&mut raw).unwrap();
+        let raw: &[u8] = &binary[mem::size_of::<ELFIdent>()..SIZE];
 
         // Now get our conversion functions to read numbers based on endianness
         let u16_from_bytes = match ident.ei_data {
