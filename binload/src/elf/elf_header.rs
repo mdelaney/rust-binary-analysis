@@ -198,91 +198,128 @@ impl fmt::Display for E_Type {
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum E_Machine {
-    None,                 // 0x00 No Machine
-    M32,                  // 0x01 AT&T WE 32100
-    Sparc,                // 0x02 Sun Sparc
-    X86,                  // 0x03 Intel 80386
-    Motorola_m68K,        // 0x04 Motorola m68k family
-    Motorola_m88K,        // 0x05 Motorola m88k family
-    Intel_MCU,            // 0x06 Intel MCU
-    Intel_860,            // 0x07 Intel 80860
-    MIPS_R3000_BE,        // 0x08 MIPS R3000 big-endian
-    IBM_System_370,       // 0x09 IBM System 370
-    MIPS_R3000_LE,        // 0x0a MIPS R3000 little-endian
-    HPPA,                 // 0x0f HPPA
-    Fujitsu_VPP500,       // 0x11 Fujitsu VPP500
-    SunV8Plus,            // 0x12 Sun's "v8plus"
-    Intel_80960,          // 0x13 Intel 80960
-    PowerPC,              // 0x14 Power PC
-    PowerPC_64,           // 0x15 PowerPC 64-bit
-    IBM_S390,             // 0x16 IBM S390
-    IBM_SPU,              // 0x17 IBM SPU/SPC
-    NEC_V800,             // 0x24 NEC V800 series
-    Fujitsu_FR20,         // 0x25 Fujitsu FR20
-    TRW_RH32,             // 0x26 TRW RH-32
-    Motorola_RCE,         // 0x27 Motorola RCE
-    ARM,                  // 0x28 ARM
-    DigitalAlpha,         // 0x29 Digital Alpha
-    HitachiSuperH,        // 0x2a Hitachi SH
-    SPARC_V9,             // 0x2b SPARC v9 64-bit
-    Tricore,              // 0x2c Siemens Tricore
-    ARC,                  // 0x2d Argonaut RISC Core
-    Hitachi_H8_300,       // 0x2e Hitachi H8/300
-    Hitachi_H8_300H,      // 0x2f Hitachi H8/300H
-    Hitachi_H8S,          // 0x30 Hitachi H8S
-    Hitachi_H8_500,       // 0x31 Hitachi H8/500
-    IA_64,                // 0x32 Intel Merced
-    MIPS_X,               // 0x33 Stanford MIPS-X
-    Motorola_Coldfire,    // 0x34 Motorola Coldfire
-    Motorola_68HC12,      // 0x35 Motorola M68HC12
-    Fujitsu_MMA,          // 0x36 Fujitsu MMA Multimedia Accelerator
-    Siemens_PCP,          // 0x37 Siemens PCP
-    Sony_nCPU,            // 0x38 Sony nCPU embeeded RISC
-    Denso_NDR1,           // 0x39 Denso NDR1 microprocessor
-    Motorola_StartCore,   // 0x3a Motorola Start*Core processor
-    Toyota_ME16,          // 0x3b Toyota ME16 processor
-    STM_ST100,            // 0x3c STMicroelectronic ST100 processor
-    TinyJ,                // 0x3d Advanced Logic Corp. Tinyj emb.fam
-    X86_64,               // 0x3e AMD x86-64 architecture
-    Sony_PDSP,            // 0x3f Sony DSP Processor
-    Digital_PDP10,        // 0x40 Digital PDP-10
-    Digital_PDP11,        // 0x41 Digital PDP-11
-    Siemens_FX66,         // 0x42 Siemens FX66 microcontroller
-    STM_ST9Plus,          // 0x43 STMicroelectronics ST9+ 8/16 mc
-    STM_ST7,              // 0x44 STmicroelectronics ST7 8 bit mc
-    Motorola_68HC16,      // 0x45 Motorola MC68HC16 microcontroller
-    Motorola_68HC11,      // 0x46 Motorola MC68HC11 microcontroller
-    Motorola_68HC08,      // 0x47 Motorola MC68HC08 microcontroller
-    Motorola_68HC05,      // 0x48 Motorola MC68HC05 microcontroller
-    SiliconGraphics_SVX,  // 0x49 Silicon Graphics SVx
-    STM_ST19,             // 0x4a STMicroelectronics ST19 8 bit mc
-    Digital_VAX,          // 0x4b Digital VAX
-    Axis_CRIS,            // 0x4c Axis Communications 32-bit emb.proc
-    InfineonJavelin,      // 0x4d Infineon Technologies 32-bit emb.proc
-    Element14Firepath,    // 0x4e Element 14 64-bit DSP Processor
-    LSI_ZSP,              // 0x4f LSI Logic 16-bit DSP Processor
-    MMIX,                 // 0x50 Donald Knuth's educational 64-bit proc
-    HUANY,                // 0x51 Harvard University machine-independent object files
-    SiTera_Prism,         // 0x52 SiTera Prism
-    Atmel_AVR,            // 0x53 Atmel AVR 8-bit microcontroller
-    Fujitsu_FR30,         // 0x54 Fujitsu FR30
-    Mitsubishi_D10V,      // 0x55 Mitsubishi D10V
-    Mitsubishi_D30V,      // 0x56 Mitsubishi D30V
-    NEC_V850,             // 0x57 NEC v850
-    Mitsubishi_M32R,      // 0x58 Mitsubishi M32R
-    Matsushita_MN10300,   // 0x59 Matsushita MN10300
-    Matsushita_MN10200,   // 0x5a Matsushita MN10200
-    PicoJava,             // 0x5b picoJava
-    OpenRISC,             // 0x5c OpenRISC 32-bit embedded processor
-    ARC_Compact,          // 0x5d ARC International ARCompact
-    TensilicaXtensa,      // 0x5e Tensilica Xtensa Architecture
-    AlphamosaicVideoCore, // 0x5f Alphamosaic VideoCore
-    TMM_GPP,              // 0x60 Thompson Multimedia General Purpose Proc
-    NationalSemi_32K,     // 0x61 National Semi. 32000
-    TenorNetwork_TPC,     // 0x62 Tenor Network TPC
-    Trebia_SNP1K,         // 0x63 Trebia SNP 1000
-    STM_ST200,            // 0x64 STMicroelectronics ST200
-    // TODO: you are here, 0x64 is 100
+    None,                   // 0x00 No Machine
+    M32,                    // 0x01 AT&T WE 32100
+    Sparc,                  // 0x02 Sun Sparc
+    X86,                    // 0x03 Intel 80386
+    Motorola_m68K,          // 0x04 Motorola m68k family
+    Motorola_m88K,          // 0x05 Motorola m88k family
+    Intel_MCU,              // 0x06 Intel MCU
+    Intel_860,              // 0x07 Intel 80860
+    MIPS_R3000_BE,          // 0x08 MIPS R3000 big-endian
+    IBM_System_370,         // 0x09 IBM System 370
+    MIPS_R3000_LE,          // 0x0a MIPS R3000 little-endian
+    HPPA,                   // 0x0f HPPA
+    Fujitsu_VPP500,         // 0x11 Fujitsu VPP500
+    SunV8Plus,              // 0x12 Sun's "v8plus"
+    Intel_80960,            // 0x13 Intel 80960
+    PowerPC,                // 0x14 Power PC
+    PowerPC_64,             // 0x15 PowerPC 64-bit
+    IBM_S390,               // 0x16 IBM S390
+    IBM_SPU,                // 0x17 IBM SPU/SPC
+    NEC_V800,               // 0x24 NEC V800 series
+    Fujitsu_FR20,           // 0x25 Fujitsu FR20
+    TRW_RH32,               // 0x26 TRW RH-32
+    Motorola_RCE,           // 0x27 Motorola RCE
+    ARM,                    // 0x28 ARM
+    DigitalAlpha,           // 0x29 Digital Alpha
+    HitachiSuperH,          // 0x2a Hitachi SH
+    SPARC_V9,               // 0x2b SPARC v9 64-bit
+    Tricore,                // 0x2c Siemens Tricore
+    ARC,                    // 0x2d Argonaut RISC Core
+    Hitachi_H8_300,         // 0x2e Hitachi H8/300
+    Hitachi_H8_300H,        // 0x2f Hitachi H8/300H
+    Hitachi_H8S,            // 0x30 Hitachi H8S
+    Hitachi_H8_500,         // 0x31 Hitachi H8/500
+    IA_64,                  // 0x32 Intel Merced
+    MIPS_X,                 // 0x33 Stanford MIPS-X
+    Motorola_Coldfire,      // 0x34 Motorola Coldfire
+    Motorola_68HC12,        // 0x35 Motorola M68HC12
+    Fujitsu_MMA,            // 0x36 Fujitsu MMA Multimedia Accelerator
+    Siemens_PCP,            // 0x37 Siemens PCP
+    Sony_nCPU,              // 0x38 Sony nCPU embeeded RISC
+    Denso_NDR1,             // 0x39 Denso NDR1 microprocessor
+    Motorola_StartCore,     // 0x3a Motorola Start*Core processor
+    Toyota_ME16,            // 0x3b Toyota ME16 processor
+    STM_ST100,              // 0x3c STMicroelectronic ST100 processor
+    TinyJ,                  // 0x3d Advanced Logic Corp. Tinyj emb.fam
+    X86_64,                 // 0x3e AMD x86-64 architecture
+    Sony_PDSP,              // 0x3f Sony DSP Processor
+    Digital_PDP10,          // 0x40 Digital PDP-10
+    Digital_PDP11,          // 0x41 Digital PDP-11
+    Siemens_FX66,           // 0x42 Siemens FX66 microcontroller
+    STM_ST9Plus,            // 0x43 STMicroelectronics ST9+ 8/16 mc
+    STM_ST7,                // 0x44 STmicroelectronics ST7 8 bit mc
+    Motorola_68HC16,        // 0x45 Motorola MC68HC16 microcontroller
+    Motorola_68HC11,        // 0x46 Motorola MC68HC11 microcontroller
+    Motorola_68HC08,        // 0x47 Motorola MC68HC08 microcontroller
+    Motorola_68HC05,        // 0x48 Motorola MC68HC05 microcontroller
+    SiliconGraphics_SVX,    // 0x49 Silicon Graphics SVx
+    STM_ST19,               // 0x4a STMicroelectronics ST19 8 bit mc
+    Digital_VAX,            // 0x4b Digital VAX
+    Axis_CRIS,              // 0x4c Axis Communications 32-bit emb.proc
+    InfineonJavelin,        // 0x4d Infineon Technologies 32-bit emb.proc
+    Element14Firepath,      // 0x4e Element 14 64-bit DSP Processor
+    LSI_ZSP,                // 0x4f LSI Logic 16-bit DSP Processor
+    MMIX,                   // 0x50 Donald Knuth's educational 64-bit proc
+    HUANY,                  // 0x51 Harvard University machine-independent object files
+    SiTera_Prism,           // 0x52 SiTera Prism
+    Atmel_AVR,              // 0x53 Atmel AVR 8-bit microcontroller
+    Fujitsu_FR30,           // 0x54 Fujitsu FR30
+    Mitsubishi_D10V,        // 0x55 Mitsubishi D10V
+    Mitsubishi_D30V,        // 0x56 Mitsubishi D30V
+    NEC_V850,               // 0x57 NEC v850
+    Mitsubishi_M32R,        // 0x58 Mitsubishi M32R
+    Matsushita_MN10300,     // 0x59 Matsushita MN10300
+    Matsushita_MN10200,     // 0x5a Matsushita MN10200
+    PicoJava,               // 0x5b picoJava
+    OpenRISC,               // 0x5c OpenRISC 32-bit embedded processor
+    ARC_Compact,            // 0x5d ARC International ARCompact
+    TensilicaXtensa,        // 0x5e Tensilica Xtensa Architecture
+    AlphamosaicVideoCore,   // 0x5f Alphamosaic VideoCore
+    TMM_GPP,                // 0x60 Thompson Multimedia General Purpose Proc
+    NationalSemi_32K,       // 0x61 National Semi. 32000
+    TenorNetwork_TPC,       // 0x62 Tenor Network TPC
+    Trebia_SNP1K,           // 0x63 Trebia SNP 1000
+    STM_ST200,              // 0x64 STMicroelectronics ST200
+    Ubicom_IP2K,            // 0x65 Ubicom IP2xxx
+    MAX,                    // 0x66 MAX processor
+    NationalSemi_CR,        // 0x67 National Semi. CompactRISC
+    Fujitsu_F2MC16,         // 0x68 Fujitsu F2MC16
+    TI_MSP430,              // 0x69 Texas Instruments msp430
+    AnalogDevices_Blackfin, // 0x6a Analog Devices Blackfin DSP
+    Epson_SE_C33,           // 0x6b Seiko Epson S1C33 family
+    SharpEmbeddedProcessor, // 0x6c Sharp embedded microprocessor
+    Arca,                   // 0x6d Arca RISC
+    Unicore,                // 0x6e PKU-Unity & MPRC Peking Uni. mc series
+    Excess,                 // 0x6f eXcess configurable cpu
+    Icera_DXP,              // 0x70 Icera Semi. Deep Execution Processor
+    Altera_NIOS2,           // 0x71 Altera Nios II
+    NationalSemi_CRX,       // 0x72 National Semi. CompactRISC CRX
+    Motorola_XGATE,         // 0x73 Motorola XGATE
+    Infineon_C166,          // 0x74 Infineon C16x/XC16x
+    Renesas_M16C,           // 0x75 Renesas M16C
+    MicrochipTech_dsPIC30F, // 0x76 Microchip Technology dsPIC30F
+    Freescale_CE,           // 0x77 Freescale Communication Engine RISC
+    Renesas_M32C,           // 0x78 Renesas M32C
+    // 0x78 - 0x82 reserved
+    Altium_TSK3000,      // 0x83 Altium TSK3000
+    Freescale_RS08,      // 0x84 Freescale RS08
+    AnalogDevices_SHARC, // 0x85 Analog Devices SHARC family
+    Cyan_ECOG2,          // 0x86 Cyan Technology eCOG2
+    Sunplus_SCORE7,      // 0x87 Sunplus S+core7 RISC
+    NewJapanRadio_DSP24, // 0x88 New Japan Radio (NJR) 24-bit DSP
+    Broadcom_VideoCore3, // 0x89 Broadcom VideoCore III
+    LatticeMICO32,       // 0x8a RISC for Lattice FPGA
+    SeiekoEpson_C17,     // 0x8b Seiko Epson C17
+    TI_C6000,            // 0x8c Texas Instruments TMS320C6000 DSP
+    TI_C2000,            // 0x8d Texas Instruments TMS320C2000 DSP
+    TI_C5500,            // 0x8e Texas Instruments TMS320C55x DSP
+    TI_ARP32,            // 0x8f Texas Instruments App. Specific RISC
+    TI_PRU,              // 0x90 Texas Instruments Prog. Realtime Unit
+    // 0x91 -0x9f reserved
+
+    // TODO: you are here, 0x9f is 159
     Aarch64,  // 0xb7
     RiscV,    // 0xf3 Risk-V
     LinuxBPF, // 0xf7 Linux BPF -- in-kernel virtual machine
@@ -377,6 +414,40 @@ impl E_Machine {
             0x0062 => E_Machine::TenorNetwork_TPC,
             0x0063 => E_Machine::Trebia_SNP1K,
             0x0064 => E_Machine::STM_ST200,
+            0x0065 => E_Machine::Ubicom_IP2K,
+            0x0066 => E_Machine::MAX,
+            0x0067 => E_Machine::NationalSemi_CR,
+            0x0068 => E_Machine::Fujitsu_F2MC16,
+            0x0069 => E_Machine::TI_MSP430,
+            0x006a => E_Machine::AnalogDevices_Blackfin,
+            0x006b => E_Machine::Epson_SE_C33,
+            0x006c => E_Machine::SharpEmbeddedProcessor,
+            0x006d => E_Machine::Arca,
+            0x006e => E_Machine::Unicore,
+            0x006f => E_Machine::Excess,
+            0x0070 => E_Machine::Icera_DXP,
+            0x0071 => E_Machine::Altera_NIOS2,
+            0x0072 => E_Machine::NationalSemi_CRX,
+            0x0073 => E_Machine::Motorola_XGATE,
+            0x0074 => E_Machine::Infineon_C166,
+            0x0075 => E_Machine::Renesas_M16C,
+            0x0076 => E_Machine::MicrochipTech_dsPIC30F,
+            0x0077 => E_Machine::Freescale_CE,
+            0x0078 => E_Machine::Renesas_M32C,
+            0x0083 => E_Machine::Altium_TSK3000,
+            0x0084 => E_Machine::Freescale_RS08,
+            0x0085 => E_Machine::AnalogDevices_SHARC,
+            0x0086 => E_Machine::Cyan_ECOG2,
+            0x0087 => E_Machine::Sunplus_SCORE7,
+            0x0088 => E_Machine::NewJapanRadio_DSP24,
+            0x0089 => E_Machine::Broadcom_VideoCore3,
+            0x008a => E_Machine::LatticeMICO32,
+            0x008b => E_Machine::SeiekoEpson_C17,
+            0x008c => E_Machine::TI_C6000,
+            0x008d => E_Machine::TI_C2000,
+            0x008e => E_Machine::TI_C5500,
+            0x008f => E_Machine::TI_ARP32,
+            0x0090 => E_Machine::TI_PRU,
 
             0x00b7 => E_Machine::Aarch64,
             0x00f3 => E_Machine::RiscV,
