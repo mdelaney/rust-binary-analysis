@@ -101,7 +101,7 @@ pub struct ELFIdent {
 }
 
 impl ELFIdent {
-    pub fn parse_from_buffer(binary: &Vec<u8>) -> ELFIdent {
+    pub fn parse_from_buffer(binary: &[u8]) -> ELFIdent {
         const SIZE: usize = mem::size_of::<ELFIdent>();
         let raw_ident: &[u8] = &binary[0..SIZE];
 
@@ -198,55 +198,91 @@ impl fmt::Display for E_Type {
 #[allow(dead_code)]
 #[derive(Debug)]
 pub enum E_Machine {
-    None,               // 0x00 No Machine
-    M32,                // 0x01 AT&T WE 32100
-    Sparc,              // 0x02 Sun Sparc
-    X86,                // 0x03 Intel 80386
-    Motorola_m68K,      // 0x04 Motorola m68k family
-    Motorola_m88K,      // 0x05 Motorola m88k family
-    Intel_MCU,          // 0x06 Intel MCU
-    Intel_860,          // 0x07 Intel 80860
-    MIPS_R3000_BE,      // 0x08 MIPS R3000 big-endian
-    IBM_System_370,     // 0x09 IBM System 370
-    MIPS_R3000_LE,      // 0x0a MIPS R3000 little-endian
-    HPPA,               // 0x0f HPPA
-    Fujitsu_VPP500,     // 0x11 Fujitsu VPP500
-    SunV8Plus,          // 0x12 Sun's "v8plus"
-    Intel_80960,        // 0x13 Intel 80960
-    PowerPC,            // 0x14 Power PC
-    PowerPC_64,         // 0x15 PowerPC 64-bit
-    IBM_S390,           // 0x16 IBM S390
-    IBM_SPU,            // 0x17 IBM SPU/SPC
-    NEC_V800,           // 0x24 NEC V800 series
-    Fujitsu_FR20,       // 0x25 Fujitsu FR20
-    TRW_RH32,           // 0x26 TRW RH-32
-    Motorola_RCE,       // 0x27 Motorola RCE
-    ARM,                // 0x28 ARM
-    DigitalAlpha,       // 0x29 Digital Alpha
-    HitachiSuperH,      // 0x2a Hitachi SH
-    SPARC_V9,           // 0x2b SPARC v9 64-bit
-    Tricore,            // 0x2c Siemens Tricore
-    ARC,                // 0x2d Argonaut RISC Core
-    Hitachi_H8_300,     // 0x2e Hitachi H8/300
-    Hitachi_H8_300H,    // 0x2f Hitachi H8/300H
-    Hitachi_H8S,        // 0x30 Hitachi H8S
-    Hitachi_H8_500,     // 0x31 Hitachi H8/500
-    IA_64,              // 0x32 Intel Merced
-    MIPS_X,             // 0x33 Stanford MIPS-X
-    Motorola_Coldfire,  // 0x34 Motorola Coldfire
-    Motorola_68HC12,    // 0x35 Motorola M68HC12
-    Fujitsu_MMA,        // 0x36 Fujitsu MMA Multimedia Accelerator
-    Siemens_PCP,        // 0x37 Siemens PCP
-    Sony_nCPU,          // 0x38 Sony nCPU embeeded RISC
-    Denso_NDR1,         // 0x39 Denso NDR1 microprocessor
-    Motorola_StartCore, // 0x3a Motorola Start*Core processor
-    Toyota_ME16,        // 0x3b Toyota ME16 processor
-    STM_ST100,          // 0x3c STMicroelectronic ST100 processor
-    TinyJ,              // 0x3d Advanced Logic Corp. Tinyj emb.fam
-    X86_64,             // 0x3e AMD x86-64 architecture
-    Sony_PDSP,          // 0x3f Sony DSP Processor
-    Digital_PDP10,      // 0x40 Digital PDP-10
-    // TODO
+    None,                 // 0x00 No Machine
+    M32,                  // 0x01 AT&T WE 32100
+    Sparc,                // 0x02 Sun Sparc
+    X86,                  // 0x03 Intel 80386
+    Motorola_m68K,        // 0x04 Motorola m68k family
+    Motorola_m88K,        // 0x05 Motorola m88k family
+    Intel_MCU,            // 0x06 Intel MCU
+    Intel_860,            // 0x07 Intel 80860
+    MIPS_R3000_BE,        // 0x08 MIPS R3000 big-endian
+    IBM_System_370,       // 0x09 IBM System 370
+    MIPS_R3000_LE,        // 0x0a MIPS R3000 little-endian
+    HPPA,                 // 0x0f HPPA
+    Fujitsu_VPP500,       // 0x11 Fujitsu VPP500
+    SunV8Plus,            // 0x12 Sun's "v8plus"
+    Intel_80960,          // 0x13 Intel 80960
+    PowerPC,              // 0x14 Power PC
+    PowerPC_64,           // 0x15 PowerPC 64-bit
+    IBM_S390,             // 0x16 IBM S390
+    IBM_SPU,              // 0x17 IBM SPU/SPC
+    NEC_V800,             // 0x24 NEC V800 series
+    Fujitsu_FR20,         // 0x25 Fujitsu FR20
+    TRW_RH32,             // 0x26 TRW RH-32
+    Motorola_RCE,         // 0x27 Motorola RCE
+    ARM,                  // 0x28 ARM
+    DigitalAlpha,         // 0x29 Digital Alpha
+    HitachiSuperH,        // 0x2a Hitachi SH
+    SPARC_V9,             // 0x2b SPARC v9 64-bit
+    Tricore,              // 0x2c Siemens Tricore
+    ARC,                  // 0x2d Argonaut RISC Core
+    Hitachi_H8_300,       // 0x2e Hitachi H8/300
+    Hitachi_H8_300H,      // 0x2f Hitachi H8/300H
+    Hitachi_H8S,          // 0x30 Hitachi H8S
+    Hitachi_H8_500,       // 0x31 Hitachi H8/500
+    IA_64,                // 0x32 Intel Merced
+    MIPS_X,               // 0x33 Stanford MIPS-X
+    Motorola_Coldfire,    // 0x34 Motorola Coldfire
+    Motorola_68HC12,      // 0x35 Motorola M68HC12
+    Fujitsu_MMA,          // 0x36 Fujitsu MMA Multimedia Accelerator
+    Siemens_PCP,          // 0x37 Siemens PCP
+    Sony_nCPU,            // 0x38 Sony nCPU embeeded RISC
+    Denso_NDR1,           // 0x39 Denso NDR1 microprocessor
+    Motorola_StartCore,   // 0x3a Motorola Start*Core processor
+    Toyota_ME16,          // 0x3b Toyota ME16 processor
+    STM_ST100,            // 0x3c STMicroelectronic ST100 processor
+    TinyJ,                // 0x3d Advanced Logic Corp. Tinyj emb.fam
+    X86_64,               // 0x3e AMD x86-64 architecture
+    Sony_PDSP,            // 0x3f Sony DSP Processor
+    Digital_PDP10,        // 0x40 Digital PDP-10
+    Digital_PDP11,        // 0x41 Digital PDP-11
+    Siemens_FX66,         // 0x42 Siemens FX66 microcontroller
+    STM_ST9Plus,          // 0x43 STMicroelectronics ST9+ 8/16 mc
+    STM_ST7,              // 0x44 STmicroelectronics ST7 8 bit mc
+    Motorola_68HC16,      // 0x45 Motorola MC68HC16 microcontroller
+    Motorola_68HC11,      // 0x46 Motorola MC68HC11 microcontroller
+    Motorola_68HC08,      // 0x47 Motorola MC68HC08 microcontroller
+    Motorola_68HC05,      // 0x48 Motorola MC68HC05 microcontroller
+    SiliconGraphics_SVX,  // 0x49 Silicon Graphics SVx
+    STM_ST19,             // 0x4a STMicroelectronics ST19 8 bit mc
+    Digital_VAX,          // 0x4b Digital VAX
+    Axis_CRIS,            // 0x4c Axis Communications 32-bit emb.proc
+    InfineonJavelin,      // 0x4d Infineon Technologies 32-bit emb.proc
+    Element14Firepath,    // 0x4e Element 14 64-bit DSP Processor
+    LSI_ZSP,              // 0x4f LSI Logic 16-bit DSP Processor
+    MMIX,                 // 0x50 Donald Knuth's educational 64-bit proc
+    HUANY,                // 0x51 Harvard University machine-independent object files
+    SiTera_Prism,         // 0x52 SiTera Prism
+    Atmel_AVR,            // 0x53 Atmel AVR 8-bit microcontroller
+    Fujitsu_FR30,         // 0x54 Fujitsu FR30
+    Mitsubishi_D10V,      // 0x55 Mitsubishi D10V
+    Mitsubishi_D30V,      // 0x56 Mitsubishi D30V
+    NEC_V850,             // 0x57 NEC v850
+    Mitsubishi_M32R,      // 0x58 Mitsubishi M32R
+    Matsushita_MN10300,   // 0x59 Matsushita MN10300
+    Matsushita_MN10200,   // 0x5a Matsushita MN10200
+    PicoJava,             // 0x5b picoJava
+    OpenRISC,             // 0x5c OpenRISC 32-bit embedded processor
+    ARC_Compact,          // 0x5d ARC International ARCompact
+    TensilicaXtensa,      // 0x5e Tensilica Xtensa Architecture
+    AlphamosaicVideoCore, // 0x5f Alphamosaic VideoCore
+    TMM_GPP,              // 0x60 Thompson Multimedia General Purpose Proc
+    NationalSemi_32K,     // 0x61 National Semi. 32000
+    TenorNetwork_TPC,     // 0x62 Tenor Network TPC
+    Trebia_SNP1K,         // 0x63 Trebia SNP 1000
+    STM_ST200,            // 0x64 STMicroelectronics ST200
+    // TODO: you are here, 0x64 is 100
     Aarch64,  // 0xb7
     RiscV,    // 0xf3 Risk-V
     LinuxBPF, // 0xf7 Linux BPF -- in-kernel virtual machine
@@ -305,6 +341,43 @@ impl E_Machine {
             0x003e => E_Machine::X86_64,
             0x003f => E_Machine::Sony_PDSP,
             0x0040 => E_Machine::Digital_PDP10,
+            0x0041 => E_Machine::Digital_PDP11,
+            0x0042 => E_Machine::Siemens_FX66,
+            0x0043 => E_Machine::STM_ST9Plus,
+            0x0044 => E_Machine::STM_ST7,
+            0x0045 => E_Machine::Motorola_68HC16,
+            0x0046 => E_Machine::Motorola_68HC11,
+            0x0047 => E_Machine::Motorola_68HC08,
+            0x0048 => E_Machine::Motorola_68HC05,
+            0x0049 => E_Machine::SiliconGraphics_SVX,
+            0x004a => E_Machine::STM_ST19,
+            0x004b => E_Machine::Digital_VAX,
+            0x004c => E_Machine::Axis_CRIS,
+            0x004d => E_Machine::InfineonJavelin,
+            0x004e => E_Machine::Element14Firepath,
+            0x004f => E_Machine::LSI_ZSP,
+            0x0050 => E_Machine::MMIX,
+            0x0051 => E_Machine::HUANY,
+            0x0052 => E_Machine::SiTera_Prism,
+            0x0053 => E_Machine::Atmel_AVR,
+            0x0054 => E_Machine::Fujitsu_FR30,
+            0x0055 => E_Machine::Mitsubishi_D10V,
+            0x0056 => E_Machine::Mitsubishi_D30V,
+            0x0057 => E_Machine::NEC_V850,
+            0x0058 => E_Machine::Mitsubishi_M32R,
+            0x0059 => E_Machine::Matsushita_MN10300,
+            0x005a => E_Machine::Matsushita_MN10200,
+            0x005b => E_Machine::PicoJava,
+            0x005c => E_Machine::OpenRISC,
+            0x005d => E_Machine::ARC_Compact,
+            0x005e => E_Machine::TensilicaXtensa,
+            0x005f => E_Machine::AlphamosaicVideoCore,
+            0x0060 => E_Machine::TMM_GPP,
+            0x0061 => E_Machine::NationalSemi_32K,
+            0x0062 => E_Machine::TenorNetwork_TPC,
+            0x0063 => E_Machine::Trebia_SNP1K,
+            0x0064 => E_Machine::STM_ST200,
+
             0x00b7 => E_Machine::Aarch64,
             0x00f3 => E_Machine::RiscV,
             0x00f7 => E_Machine::LinuxBPF,
@@ -332,7 +405,7 @@ pub struct ELFHeader {
 }
 
 impl ELFHeader {
-    pub fn parse_from_buffer(binary: &Vec<u8>, ident: ELFIdent) -> ELFHeader {
+    pub fn parse_from_buffer(binary: &[u8], ident: ELFIdent) -> ELFHeader {
         // First get the bytes for our header
         const SIZE: usize = mem::size_of::<ELFHeader>();
         let raw: &[u8] = &binary[mem::size_of::<ELFIdent>()..SIZE];
@@ -356,7 +429,7 @@ impl ELFHeader {
         // files (given the numeric conversion is lossless)
         let result: ELFHeader = match ident.ei_class {
             EI_Class::ELF32 => ELFHeader {
-                ident: ident,
+                ident,
                 e_type: E_Type::from_u16(u16_from_bytes(raw[0..2].try_into().unwrap())),
                 e_machine: E_Machine::from_u16(u16_from_bytes(raw[2..4].try_into().unwrap())),
                 e_version: u32_from_bytes(raw[4..8].try_into().unwrap()),
@@ -372,7 +445,7 @@ impl ELFHeader {
                 e_shstrndx: u16_from_bytes(raw[34..36].try_into().unwrap()),
             },
             EI_Class::ELF64 => ELFHeader {
-                ident: ident,
+                ident,
                 e_type: E_Type::from_u16(u16_from_bytes(raw[0..2].try_into().unwrap())),
                 e_machine: E_Machine::from_u16(u16_from_bytes(raw[2..4].try_into().unwrap())),
                 e_version: u32_from_bytes(raw[4..8].try_into().unwrap()),

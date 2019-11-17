@@ -64,19 +64,19 @@ impl SectionType {
             0x11 => SectionType::Group,
             0x12 => SectionType::SymTabShNdx,
             0x13 => SectionType::Num,
-            0x6ffffff5 => SectionType::GNUAttributes,
-            0x6ffffff6 => SectionType::GNUHash,
-            0x6ffffff7 => SectionType::GNULibList,
-            0x6ffffff8 => SectionType::Checksum,
-            0x6ffffffa => SectionType::SunWMove,
-            0x6ffffffb => SectionType::SunWCOMDAT,
-            0x6ffffffc => SectionType::SunWSyminfo,
-            0x6ffffffd => SectionType::GNUVersionDef,
-            0x6ffffffe => SectionType::GNUVersionNeeds,
-            0x6fffffff => SectionType::GNUVersionSymTbl,
-            0x60000000..=0x6fffffff => SectionType::OSSpecific,
-            0x70000000..=0x7fffffff => SectionType::ProcessorSpecific,
-            0x80000000..=0x8fffffff => SectionType::ApplicationSpecific,
+            0x6fff_fff5 => SectionType::GNUAttributes,
+            0x6fff_fff6 => SectionType::GNUHash,
+            0x6fff_fff7 => SectionType::GNULibList,
+            0x6fff_fff8 => SectionType::Checksum,
+            0x6fff_fffa => SectionType::SunWMove,
+            0x6fff_fffb => SectionType::SunWCOMDAT,
+            0x6fff_fffc => SectionType::SunWSyminfo,
+            0x6fff_fffd => SectionType::GNUVersionDef,
+            0x6fff_fffe => SectionType::GNUVersionNeeds,
+            0x6fff_ffff => SectionType::GNUVersionSymTbl,
+            0x6000_0000..=0x6fff_ffff => SectionType::OSSpecific,
+            0x7000_0000..=0x7fff_ffff => SectionType::ProcessorSpecific,
+            0x8000_0000..=0x8fff_ffff => SectionType::ApplicationSpecific,
             _ => SectionType::Unknown,
         }
     }
@@ -124,20 +124,21 @@ impl fmt::Display for SectionType {
 #[allow(dead_code)]
 //#[derive(Debug)]
 pub enum SectionFlags {
-    Write,           // 0x01 Writable
-    Alloc,           // 0x02 Occupies memory during execution
-    ExecInstr,       // 0x04 Executable
-    Merge,           // 0x10 Might be merged
-    Strings,         // 0x20 Contains nul-terminated strings
-    InfoLink,        // 0x40 'sh_info' contains SHT index
-    LinkOrder,       // 0x80 Preserve order after combining
-    OSNonconforming, // 0x100 Non-standard OS specific handling required
-    Group,           // 0x200 Section is member of a group
-    TLS,             // 0x400 Section hold thread-local data
+    Write,           // (1 << 0)  Writable
+    Alloc,           // (1 << 1)  Occupies memory during execution
+    ExecInstr,       // (1 << 2)  Executable
+    Merge,           // (1 << 4)  Might be merged
+    Strings,         // (1 << 5)  Contains nul-terminated strings
+    InfoLink,        // (1 << 6)  'sh_info' contains SHT index
+    LinkOrder,       // (1 << 7)  Preserve order after combining
+    OSNonconforming, // (1 << 8)  Non-standard OS specific handling required
+    Group,           // (1 << 9)  Section is member of a group
+    TLS,             // (1 << 10) Section hold thread-local data
+    Compressed,      // (1 << 11) Section with compressed data
     MaskOS,          // 0x0ff00000 OS specific
     MaskProc,        // 0xf0000000 Processor specific
-    Ordered,         // 0x40000000 Special ordering requirement (solaris)
-    Exclude,         // 0x80000000 Section is excluded unless referenced or allocated (solaris)
+    Ordered,         // (1 << 30) Special ordering requirement (solaris)
+    Exclude,         // (1 << 31) Section is excluded unless referenced or allocated (solaris)
 }
 impl SectionFlags {
     fn from_u32(value: u32) -> Vec<SectionFlags> {
@@ -148,46 +149,49 @@ impl SectionFlags {
     //       and flag values and appending matches
     fn from_u64(value: u64) -> Vec<SectionFlags> {
         let mut flags: Vec<SectionFlags> = vec![];
-        if value & 0x01 != 0 {
+        if value & (1 << 0) != 0 {
             flags.push(SectionFlags::Write);
         }
-        if value & 0x02 != 0 {
+        if value & (1 << 1) != 0 {
             flags.push(SectionFlags::Alloc);
         }
-        if value & 0x04 != 0 {
+        if value & (1 << 2) != 0 {
             flags.push(SectionFlags::ExecInstr);
         }
-        if value & 0x10 != 0 {
+        if value & (1 << 4) != 0 {
             flags.push(SectionFlags::Merge);
         }
-        if value & 0x20 != 0 {
+        if value & (1 << 5) != 0 {
             flags.push(SectionFlags::Strings);
         }
-        if value & 0x40 != 0 {
+        if value & (1 << 6) != 0 {
             flags.push(SectionFlags::InfoLink);
         }
-        if value & 0x80 != 0 {
+        if value & (1 << 7) != 0 {
             flags.push(SectionFlags::LinkOrder);
         }
-        if value & 0x100 != 0 {
+        if value & (1 << 8) != 0 {
             flags.push(SectionFlags::OSNonconforming);
         }
-        if value & 0x200 != 0 {
+        if value & (1 << 9) != 0 {
             flags.push(SectionFlags::Group);
         }
-        if value & 0x400 != 0 {
+        if value & (1 << 10) != 0 {
             flags.push(SectionFlags::TLS);
         }
-        if value & 0x0ff00000 != 0 {
+        if value & (1 << 11) != 0 {
+            flags.push(SectionFlags::Compressed);
+        }
+        if value & 0x0ff0_0000 != 0 {
             flags.push(SectionFlags::MaskOS);
         }
-        if value & 0xf0000000 != 0 {
+        if value & 0xf000_0000 != 0 {
             flags.push(SectionFlags::MaskProc);
         }
-        if value & 0x40000000 != 0 {
+        if value & (1 << 30) != 0 {
             flags.push(SectionFlags::Ordered);
         }
-        if value & 0x80000000 != 0 {
+        if value & (1 << 31) != 0 {
             flags.push(SectionFlags::Exclude);
         }
         flags
@@ -206,6 +210,7 @@ impl fmt::Debug for SectionFlags {
             SectionFlags::OSNonconforming => "O",
             SectionFlags::Group => "G",
             SectionFlags::TLS => "T",
+            SectionFlags::Compressed => "C",
             SectionFlags::MaskOS => "o",
             SectionFlags::MaskProc => "p",
             SectionFlags::Ordered => "o",
@@ -236,7 +241,7 @@ impl SectionHeader {
         &binary[start..end]
     }
 
-    pub fn parse_from_buffer(index: u16, binary: &Vec<u8>, header: &ELFHeader) -> SectionHeader {
+    pub fn parse_from_buffer(index: u16, binary: &[u8], header: &ELFHeader) -> SectionHeader {
         // First get the bytes for our header
         let start_index = header.e_shoff as usize + (index * header.e_shentsize) as usize;
         let end_index = start_index + header.e_shentsize as usize;
@@ -253,7 +258,7 @@ impl SectionHeader {
         };
 
         // Finally we can create our header
-        let result = match header.ident.ei_class {
+        match header.ident.ei_class {
             EI_Class::ELF32 => SectionHeader {
                 name: u32_from_bytes(raw[0..4].try_into().unwrap()),
                 section_type: SectionType::from_u32(u32_from_bytes(raw[4..8].try_into().unwrap())),
@@ -282,9 +287,7 @@ impl SectionHeader {
                 entsize: u64_from_bytes(raw[56..64].try_into().unwrap()),
                 name_string: std::string::String::new(),
             },
-        };
-
-        result
+        }
     }
 
     fn formatter(&self, f: &mut fmt::Formatter) -> fmt::Result {

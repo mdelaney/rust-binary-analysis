@@ -2,7 +2,7 @@ extern crate capstone;
 
 use capstone::prelude::*;
 
-const X86_CODE: &'static [u8] = b"\x55\x48\x8b\x05\xb8\x13\x00\x00\xe9\x14\x9e\x08\x00\x45\x31\xe4";
+const X86_CODE: &[u8] = b"\x55\x48\x8b\x05\xb8\x13\x00\x00\xe9\x14\x9e\x08\x00\x45\x31\xe4";
 
 /// Print register names
 fn reg_names<T, I>(cs: &Capstone, regs: T) -> String
@@ -33,7 +33,8 @@ fn main() {
         .build()
         .expect("Failed to create Capstone object");
 
-    let insns = cs.disasm_all(X86_CODE, 0x1000)
+    let insns = cs
+        .disasm_all(X86_CODE, 0x1000)
         .expect("Failed to disassemeble");
     println!("Found {} instructions", insns.len());
     for i in insns.iter() {

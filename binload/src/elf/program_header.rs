@@ -41,14 +41,14 @@ impl ProgramHeaderType {
             0x06 => ProgramHeaderType::ProgramHeader,
             0x07 => ProgramHeaderType::ThreadLocalStorage,
             0x08 => ProgramHeaderType::NumDefinedTypes,
-            0x6474e550 => ProgramHeaderType::GNU_EH_Frame,
-            0x6474e551 => ProgramHeaderType::GNU_Stack,
-            0x6474e552 => ProgramHeaderType::GNU_RO_AfterRelocation,
-            0x6ffffffa => ProgramHeaderType::SunWBSS,
-            0x6ffffffb => ProgramHeaderType::SunWStack,
-            0x6ffffffa..=0x6fffffff => ProgramHeaderType::SunWSpecific,
-            0x60000000..=0x6fffffff => ProgramHeaderType::OS,
-            0x70000000..=0x7fffffff => ProgramHeaderType::PROC,
+            0x6474_e550 => ProgramHeaderType::GNU_EH_Frame,
+            0x6474_e551 => ProgramHeaderType::GNU_Stack,
+            0x6474_e552 => ProgramHeaderType::GNU_RO_AfterRelocation,
+            0x6fff_fffa => ProgramHeaderType::SunWBSS,
+            0x6fff_fffb => ProgramHeaderType::SunWStack,
+            0x6fff_fffa..=0x6fff_ffff => ProgramHeaderType::SunWSpecific,
+            0x6000_0000..=0x6fff_ffff => ProgramHeaderType::OS,
+            0x7000_0000..=0x7fff_ffff => ProgramHeaderType::PROC,
             _ => ProgramHeaderType::Unknown,
         }
     }
@@ -94,7 +94,13 @@ pub struct ProgramHeader {
 }
 
 impl ProgramHeader {
-    pub fn parse_from_buffer(index: u16, binary: &Vec<u8>, header: &ELFHeader) -> ProgramHeader {
+    pub fn get_data<'a>(&self, binary: &'a [u8]) -> &'a [u8] {
+        let start = self.offset as usize;
+        let end = start + self.file_size as usize;
+        &binary[start..end]
+    }
+
+    pub fn parse_from_buffer(index: u16, binary: &[u8], header: &ELFHeader) -> ProgramHeader {
         // First get the bytes for our header
         let start_index = header.e_phoff as usize + (index * header.e_phentsize) as usize;
         let end_index = start_index + header.e_phentsize as usize;
@@ -111,7 +117,7 @@ impl ProgramHeader {
         };
 
         // Finally we can create our header
-        let result = match header.ident.ei_class {
+        match header.ident.ei_class {
             EI_Class::ELF32 => ProgramHeader {
                 header_type: ProgramHeaderType::from_u32(u32_from_bytes(
                     raw[0x00..0x04].try_into().unwrap(),
@@ -136,9 +142,7 @@ impl ProgramHeader {
                 memory_size: u64_from_bytes(raw[0x28..0x30].try_into().unwrap()),
                 align: u64_from_bytes(raw[0x30..0x38].try_into().unwrap()),
             },
-        };
-
-        result
+        }
     }
 
     fn formatter(&self, f: &mut fmt::Formatter) -> fmt::Result {

@@ -1,6 +1,7 @@
 pub mod elf_header;
 pub mod program_header;
 pub mod section_header;
+pub mod symbol;
 
 use program_header::ProgramHeader;
 use section_header::SectionHeader;
@@ -12,17 +13,17 @@ pub struct ELF {
     pub data: Vec<u8>,
 }
 
-fn get_null_terminated_string_from_vec<'a>(vec: &'a [u8], offset: usize) -> String {
+fn get_null_terminated_string_from_vec(vec: &[u8], offset: usize) -> String {
     let mut length: usize = 0;
-    for i in offset..vec.len() {
-        if vec[i] == 0x00 {
+    for (i, byte) in vec.iter().enumerate().skip(offset) {
+        if *byte == 0x00 {
             length = i;
             break;
         }
     }
     let mut string = std::string::String::with_capacity(length);
-    for i in offset..length {
-        string.push(vec[i] as char);
+    for byte in vec.iter().take(length).skip(offset) {
+        string.push(*byte as char);
     }
     string
 }
