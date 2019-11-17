@@ -1,6 +1,7 @@
 // TODO - remove allow dead code
 #![allow(dead_code)]
 #![allow(non_camel_case_types)]
+#![allow(overlapping_patterns)]
 
 use std::convert::TryInto;
 use std::fmt;
