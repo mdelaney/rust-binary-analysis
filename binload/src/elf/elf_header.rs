@@ -318,12 +318,73 @@ pub enum E_Machine {
     TI_ARP32,            // 0x8f Texas Instruments App. Specific RISC
     TI_PRU,              // 0x90 Texas Instruments Prog. Realtime Unit
     // 0x91 -0x9f reserved
-
-    // TODO: you are here, 0x9f is 159
-    Aarch64,  // 0xb7
+    STM_MMDSP_Plus,        // 0xa0 STMicroelectronics 64bit VLIW DSP
+    Cypress_M8C,           // 0xa1 Cypress M8C
+    Renesas_R32C,          // 0xa2 Renesas R32C
+    NXP_TriMedia,          // 0xa3 NXP Semi. TriMedia
+    Qualcomm_DSP6,         // 0xa4 QUALCOMM DSP6
+    Intel_8051,            // 0xa5 Intel 8051 and variants
+    STM_STxP7x,            // 0xa6 STMicroelectronics STxP7x
+    AndesTech_NDS32,       // 0xa7 Andes Tech. compact code emb. RISC
+    Cyan_ECOG1X,           // 0xa8 Cyan Technology eCOG1X
+    DallasSemi_MAXQ30,     // 0xa9 Dallas Semi. MAXQ30 mc
+    NewJapanRadio_XIMO16,  // 0xaa New Japan Radio (NJR) 16-bit DSP
+    MANIK,                 // 0xab M2000 Reconfigurable RISC
+    Cray_NV2,              // 0xac Cray NV2 vector architecture
+    Renesas_RX,            // 0xad Renesas RX
+    ImaginationTech_METAG, // 0xae Imagination Tech. META
+    MCST_Elbrus,           // 0xaf MCST Elbrus
+    Cyan_eCOG16,           // 0xb0 Cyan Technology eCOG16
+    NationialSemi_CR16,    // 0xb1 National Semi. CompactRISC CR16
+    Freescale_ETPU,        // 0xb2 Freescale Extended Time Processing Unit
+    Infineon_SLE9X,        // 0xb3 Infineon Tech. SLE9X
+    Intel_L10M,            // 0xb4 Intel L10M
+    Intel_K10M,            // 0xb5 Intel K10M
+    // 0xb6 reserved
+    ARM_AARCH64, // 0xb7 ARM AARCH64
+    // 0xb8 reserved
+    Atmel_AVR32,           // 0xb9 Amtel 32-bit microprocessor
+    STM8,                  // 0xba STMicroelectronics STM8
+    Tileta_TILE64,         // 0xbb Tileta TILE64
+    Tileta_TILEPro,        // 0xbc Tilera TILEPro
+    Xilinx_MicroBlaze,     // 0xbd Xilinx MicroBlaze
+    NVIDIA_CUDA,           // 0xbe NVIDIA CUDA
+    Tilera_TILEGx,         // 0xbf Tilera TILE-Gx
+    CloudShield,           // 0xc0 CloudShield
+    CoreA_1ST,             // 0xc1 KIPO-KAIST Core-A 1st gen.
+    CoreA_2ND,             // 0xc2 KIPO-KAIST Core-A 2nd gen.
+    Synopsys_ARC_COMPACT2, // 0xc3 Synopsys ARCompact V2
+    Open8,                 // 0xc4 Open8 RISC
+    Renesas_RL78,          // 0xc5 Renesas RL78
+    Broadcom_VideoCore5,   // 0xc6 Broadcom VideoCore V
+    Renesas_78KOR,         // 0xc7 Renesas 78KOR
+    Freescale_56800EX,     // 0xc8 Freescale 56800EX DSC
+    Beyond_BA1,            // 0xc9 Beyond BA1
+    Beyond_BA2,            // 0xca Beyond BA2
+    XMOS_xCORE,            // 0xcb XMOS xCORE
+    Microchip_PIC,         // 0xcc Microchip 8-bit PIC(r)
+    // 0xcd - 0xd1 reserved
+    KM211_KM32,                    // 0xd2 KM211 KM32
+    KM211_KMX32,                   // 0xd3 KM211 KMX32
+    KM211_EMX16,                   // 0xd4 KM211 KMX16
+    KM211_EMX8,                    // 0xd5 KM211 KMX8
+    KM211_KVARC,                   // 0xd6 KM211 KVARC
+    Paneve_CDP,                    // 0xd7 Paneve CDP
+    CognitiveSmartMemoryProcessor, // 0xd8 Cognitive Smart Memory Processor
+    Bluechip_Cool,                 // 0xd9 Bluechip CoolEngine
+    NanoradioOptimizedRISC,        // 0xda Nanoradio Optimized RISC
+    CSR_Kalimba,                   // 0xdb CSR Kalimba
+    Zilog_Z80,                     // 0xdc Zilog Z80
+    VISIUM,                        // 0xdd Controls and Data Services VISIUMcore
+    FTDI_FT32,                     // 0xde FTDI Chip FT32
+    Moxie,                         // 0xdf Moxie processor
+    AMD_GPU,                       // 0xe0 AMD GPU
+    // 0xe1 - 0xf2
     RiscV,    // 0xf3 Risk-V
     LinuxBPF, // 0xf7 Linux BPF -- in-kernel virtual machine
     C_SKY,    // 0xfc C-SKY
+    NUM,      // 0xfd
+    Alpha,    // 0x9026 Alpha,
     Unknown,
 }
 
@@ -448,11 +509,69 @@ impl E_Machine {
             0x008e => E_Machine::TI_C5500,
             0x008f => E_Machine::TI_ARP32,
             0x0090 => E_Machine::TI_PRU,
-
-            0x00b7 => E_Machine::Aarch64,
+            0x00a0 => E_Machine::STM_MMDSP_Plus,
+            0x00a1 => E_Machine::Cypress_M8C,
+            0x00a2 => E_Machine::Renesas_R32C,
+            0x00a3 => E_Machine::NXP_TriMedia,
+            0x00a4 => E_Machine::Qualcomm_DSP6,
+            0x00a5 => E_Machine::Intel_8051,
+            0x00a6 => E_Machine::STM_STxP7x,
+            0x00a7 => E_Machine::AndesTech_NDS32,
+            0x00a8 => E_Machine::Cyan_ECOG1X,
+            0x00a9 => E_Machine::DallasSemi_MAXQ30,
+            0x00aa => E_Machine::NewJapanRadio_XIMO16,
+            0x00ab => E_Machine::MANIK,
+            0x00ac => E_Machine::Cray_NV2,
+            0x00ad => E_Machine::Renesas_RX,
+            0x00ae => E_Machine::ImaginationTech_METAG,
+            0x00af => E_Machine::MCST_Elbrus,
+            0x00b0 => E_Machine::Cyan_eCOG16,
+            0x00b1 => E_Machine::NationialSemi_CR16,
+            0x00b2 => E_Machine::Freescale_ETPU,
+            0x00b3 => E_Machine::Infineon_SLE9X,
+            0x00b4 => E_Machine::Intel_L10M,
+            0x00b5 => E_Machine::Intel_K10M,
+            0x00b7 => E_Machine::ARM_AARCH64,
+            0x00b9 => E_Machine::Atmel_AVR32,
+            0x00ba => E_Machine::STM8,
+            0x00bb => E_Machine::Tileta_TILE64,
+            0x00bc => E_Machine::Tileta_TILEPro,
+            0x00bd => E_Machine::Xilinx_MicroBlaze,
+            0x00be => E_Machine::NVIDIA_CUDA,
+            0x00bf => E_Machine::Tilera_TILEGx,
+            0x00c0 => E_Machine::CloudShield,
+            0x00c1 => E_Machine::CoreA_1ST,
+            0x00c2 => E_Machine::CoreA_2ND,
+            0x00c3 => E_Machine::Synopsys_ARC_COMPACT2,
+            0x00c4 => E_Machine::Open8,
+            0x00c5 => E_Machine::Renesas_RL78,
+            0x00c6 => E_Machine::Broadcom_VideoCore5,
+            0x00c7 => E_Machine::Renesas_78KOR,
+            0x00c8 => E_Machine::Freescale_56800EX,
+            0x00c9 => E_Machine::Beyond_BA1,
+            0x00ca => E_Machine::Beyond_BA2,
+            0x00cb => E_Machine::XMOS_xCORE,
+            0x00cc => E_Machine::Microchip_PIC,
+            0x00d2 => E_Machine::KM211_KM32,
+            0x00d3 => E_Machine::KM211_KMX32,
+            0x00d4 => E_Machine::KM211_EMX16,
+            0x00d5 => E_Machine::KM211_EMX8,
+            0x00d6 => E_Machine::KM211_KVARC,
+            0x00d7 => E_Machine::Paneve_CDP,
+            0x00d8 => E_Machine::CognitiveSmartMemoryProcessor,
+            0x00d9 => E_Machine::Bluechip_Cool,
+            0x00da => E_Machine::NanoradioOptimizedRISC,
+            0x00db => E_Machine::CSR_Kalimba,
+            0x00dc => E_Machine::Zilog_Z80,
+            0x00dd => E_Machine::VISIUM,
+            0x00de => E_Machine::FTDI_FT32,
+            0x00df => E_Machine::Moxie,
+            0x00e0 => E_Machine::AMD_GPU,
             0x00f3 => E_Machine::RiscV,
             0x00f7 => E_Machine::LinuxBPF,
             0x00fc => E_Machine::C_SKY,
+            0x00fd => E_Machine::NUM,
+            0x9026 => E_Machine::Alpha,
             _ => E_Machine::Unknown,
         }
     }
