@@ -1,3 +1,5 @@
+// TODO - remove allow dead code
+#![allow(dead_code)]
 
 pub struct Section {
 //    binary: Binary
@@ -8,6 +10,7 @@ pub struct Section {
     pub bytes: Vec<u8>,
 }
 
+#[allow(dead_code)]
 pub enum SectionType {
     NONE,
     CODE,
@@ -15,7 +18,7 @@ pub enum SectionType {
 }
 
 impl SectionType {
-    pub fn contains(address: u64) -> bool {
+    pub fn contains(_address: u64) -> bool {
         true
     }
 }
