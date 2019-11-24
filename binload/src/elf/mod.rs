@@ -1,11 +1,11 @@
 pub mod elf_header;
 pub mod program_header;
-pub mod section_header;
+pub mod section;
 pub mod symbol;
 pub mod utils;
 
 use program_header::ProgramHeader;
-use section_header::SectionHeader;
+use section::SectionHeader;
 use utils::get_null_terminated_string_from_vec;
 
 pub struct ELF {
@@ -53,6 +53,10 @@ pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) ->
     println!();
 
     // TODO: you are here - time to get ELF symbols!!
+    // TODO: do we have a .dynsym section? If so lets get the symbols
+
+    // TODO: do we have a .symtab section? If so lets get the symbols
+    //    .symtab is quite likely to not exist as it isn't needed for execution
     Ok(ELF {
         elf_header,
         program_headers,

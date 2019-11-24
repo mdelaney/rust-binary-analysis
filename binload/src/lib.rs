@@ -31,7 +31,7 @@ mod tests {
 
     #[test]
     fn can_parse_header_ident() {
-        //        load_from_file("/bin/ls");
+        load_from_file("/bin/ls");
     }
 
     #[test]
