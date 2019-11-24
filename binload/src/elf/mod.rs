@@ -2,30 +2,17 @@ pub mod elf_header;
 pub mod program_header;
 pub mod section_header;
 pub mod symbol;
+pub mod utils;
 
 use program_header::ProgramHeader;
 use section_header::SectionHeader;
+use utils::get_null_terminated_string_from_vec;
 
 pub struct ELF {
     pub elf_header: elf_header::ELFHeader,
     pub program_headers: Vec<ProgramHeader>,
     pub section_headers: Vec<SectionHeader>,
     pub data: Vec<u8>,
-}
-
-fn get_null_terminated_string_from_vec(vec: &[u8], offset: usize) -> String {
-    let mut length: usize = 0;
-    for (i, byte) in vec.iter().enumerate().skip(offset) {
-        if *byte == 0x00 {
-            length = i;
-            break;
-        }
-    }
-    let mut string = std::string::String::with_capacity(length);
-    for byte in vec.iter().take(length).skip(offset) {
-        string.push(*byte as char);
-    }
-    string
 }
 
 pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) -> Result<ELF, &str> {
