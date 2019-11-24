@@ -80,42 +80,47 @@ pub struct Symbol {
 }
 
 impl Symbol {
-    pub fn parse_from_buffer(index: u16, binary: &[u8], header: &ELFHeader) -> Symbol {
+    pub fn parse_from_symbol_table(data: &[u8], header: &ELFHeader) -> Vec<Symbol> {
         // First get the bytes for our header
         let size: usize = match header.ident.ei_class {
             EI_Class::ELF32 => 16,
             EI_Class::ELF64 => 24,
         };
+        let num_entries = data.len() / size;
 
-        let start_index = index as usize * size;
-        let end_index = start_index + size as usize;
-        let raw: &[u8] = &binary[start_index..end_index];
+        let mut symbols: Vec<Symbol> = vec![];
+        for index in 0..num_entries {
+            let start_index = index * size;
+            let end_index = start_index + size;
+            let raw: &[u8] = &data[start_index..end_index];
 
-        // Now get our conversion functions to read numbers based on endianness
-        let u16_from_bytes = get_num_from_bytes!(u16, header.ident.ei_data);
-        let u32_from_bytes = get_num_from_bytes!(u32, header.ident.ei_data);
-        let u64_from_bytes = get_num_from_bytes!(u64, header.ident.ei_data);
+            // Now get our conversion functions to read numbers based on endianness
+            let u16_from_bytes = get_num_from_bytes!(u16, header.ident.ei_data);
+            let u32_from_bytes = get_num_from_bytes!(u32, header.ident.ei_data);
+            let u64_from_bytes = get_num_from_bytes!(u64, header.ident.ei_data);
 
-        match header.ident.ei_class {
-            EI_Class::ELF32 => Symbol {
-                name: u32_from_bytes(raw[0..4].try_into().unwrap()),
-                address: u64::from(u32_from_bytes(raw[4..8].try_into().unwrap())),
-                size: u64::from(u32_from_bytes(raw[8..12].try_into().unwrap())),
-                info: raw[13],
-                other: raw[14],
-                section_index: u16_from_bytes(raw[15..16].try_into().unwrap()),
-                name_string: std::string::String::new(),
-            },
-            EI_Class::ELF64 => Symbol {
-                name: u32_from_bytes(raw[0..4].try_into().unwrap()),
-                info: raw[4],
-                other: raw[5],
-                section_index: u16_from_bytes(raw[6..8].try_into().unwrap()),
-                address: u64_from_bytes(raw[8..16].try_into().unwrap()),
-                size: u64_from_bytes(raw[16..24].try_into().unwrap()),
-                name_string: std::string::String::new(),
-            },
+            symbols.push(match header.ident.ei_class {
+                EI_Class::ELF32 => Symbol {
+                    name: u32_from_bytes(raw[0..4].try_into().unwrap()),
+                    address: u64::from(u32_from_bytes(raw[4..8].try_into().unwrap())),
+                    size: u64::from(u32_from_bytes(raw[8..12].try_into().unwrap())),
+                    info: raw[13],
+                    other: raw[14],
+                    section_index: u16_from_bytes(raw[15..16].try_into().unwrap()),
+                    name_string: std::string::String::new(),
+                },
+                EI_Class::ELF64 => Symbol {
+                    name: u32_from_bytes(raw[0..4].try_into().unwrap()),
+                    info: raw[4],
+                    other: raw[5],
+                    section_index: u16_from_bytes(raw[6..8].try_into().unwrap()),
+                    address: u64_from_bytes(raw[8..16].try_into().unwrap()),
+                    size: u64_from_bytes(raw[16..24].try_into().unwrap()),
+                    name_string: std::string::String::new(),
+                },
+            });
         }
+        symbols
     }
 
     fn formatter(&self, f: &mut fmt::Formatter) -> fmt::Result {
