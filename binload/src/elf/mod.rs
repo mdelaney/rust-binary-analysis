@@ -28,12 +28,13 @@ fn get_null_terminated_string_from_vec(vec: &[u8], offset: usize) -> String {
     string
 }
 
-pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) -> ELF {
+pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) -> Result<ELF, &str> {
     let mut data: Vec<u8> = vec![];
     buffer.read_to_end(&mut data).unwrap();
 
     // First we get ELF headers
-    let elf_ident = elf_header::ELFIdent::parse_from_buffer(&data);
+    let elf_ident = elf_header::ELFIdent::parse_from_buffer(&data)?;
+
     println!("Read struct: \n{:#?}", elf_ident);
     let elf_header = elf_header::ELFHeader::parse_from_buffer(&data, elf_ident);
     println!("header32\n{:#?}", elf_header);
@@ -65,12 +66,12 @@ pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) ->
     println!();
 
     // TODO: you are here - time to get ELF symbols!!
-    ELF {
+    Ok(ELF {
         elf_header,
         program_headers,
         section_headers,
         data,
-    }
+    })
 }
 
 fn get_section_headers_print_string(section_headers: &[SectionHeader]) -> String {

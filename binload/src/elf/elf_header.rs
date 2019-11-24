@@ -1,12 +1,27 @@
 // TODO - remove allow dead code
 #![allow(non_camel_case_types)]
+#![macro_use]
 
 use std::convert::TryInto;
 use std::fmt;
 use std::mem;
+use std::result::Result::Err;
+
+// This makes it easy to get the function to convert from bytes to a number type
+// with a specified endianness
+// use like:
+//   let u32_from_bytes = get_num_from_bytes!(u32, ident.ei_data)
+macro_rules! get_num_from_bytes {
+    ( $size:ident, $x:expr ) => {
+        match $x {
+            EI_Data::LittleEndian => $size::from_le_bytes,
+            EI_Data::BigEndian => $size::from_be_bytes,
+        }
+    };
+}
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum EI_Data {
     LittleEndian,
     BigEndian,
@@ -22,7 +37,7 @@ impl EI_Data {
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum EI_Class {
     ELF32,
     ELF64,
@@ -38,7 +53,7 @@ impl EI_Class {
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum EI_OSABI {
     SystemV,
     HPUX,
@@ -90,6 +105,7 @@ impl EI_OSABI {
     }
 }
 
+#[derive(Eq, PartialEq)]
 pub struct ELFIdent {
     pub ei_magic: [u8; 4],
     pub ei_class: EI_Class, // 1 == 32 bit, 2 == 64 bit
@@ -101,12 +117,15 @@ pub struct ELFIdent {
 }
 
 impl ELFIdent {
-    pub fn parse_from_buffer(binary: &[u8]) -> ELFIdent {
+    pub fn parse_from_buffer(binary: &[u8]) -> Result<ELFIdent, &'static str> {
         const SIZE: usize = mem::size_of::<ELFIdent>();
         let raw_ident: &[u8] = &binary[0..SIZE];
 
         let mut magic = [0; 4];
         magic.copy_from_slice(&raw_ident[0..4]);
+        if magic != [0x7F, 0x45, 0x4C, 0x46] {
+            return Err("invalid magic bytes!");
+        }
 
         let mut pad = [0; 7];
         pad.copy_from_slice(&raw_ident[9..16]);
@@ -120,8 +139,7 @@ impl ELFIdent {
             ei_abi_version: raw_ident[8],
             ei_pad: pad,
         };
-        // TODO: validate magic
-        result
+        Ok(result)
     }
 
     fn formatter(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -138,6 +156,44 @@ impl ELFIdent {
     }
 }
 
+#[cfg(test)]
+mod elf_ident_tests {
+    use super::*;
+
+    #[test]
+    fn can_parse_basic_ident_section() {
+        let raw = &[
+            0x7F, 0x45, 0x4C, 0x46, 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00,
+        ];
+        let expected = ELFIdent {
+            ei_magic: [0x7F, 0x45, 0x4C, 0x46],
+            ei_class: EI_Class::ELF64,
+            ei_data: EI_Data::LittleEndian,
+            ei_version: 1,
+            ei_os_abi: EI_OSABI::SystemV,
+            ei_abi_version: 0,
+            ei_pad: [0; 7],
+        };
+        match ELFIdent::parse_from_buffer(raw) {
+            Ok(v) => assert_eq!(v, expected),
+            Err(_) => assert!(false),
+        };
+    }
+
+    #[test]
+    fn fails_to_parse_with_bad_magic_bytes() {
+        let raw = &[
+            0x6F, 0x45, 0x4C, 0x46, 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00,
+        ];
+        match ELFIdent::parse_from_buffer(raw) {
+            Ok(_) => assert!(false),
+            Err(_) => assert!(true),
+        };
+    }
+}
+
 impl fmt::Display for ELFIdent {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.formatter(f)
@@ -151,7 +207,7 @@ impl fmt::Debug for ELFIdent {
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum E_Type {
     NONE, // 0x00
     REL,  // 0x01
@@ -196,7 +252,7 @@ impl fmt::Display for E_Type {
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum E_Machine {
     None,                   // 0x00 No Machine
     M32,                    // 0x01 AT&T WE 32100
@@ -577,6 +633,7 @@ impl E_Machine {
     }
 }
 
+#[derive(Eq, PartialEq)]
 pub struct ELFHeader {
     pub ident: ELFIdent,
     pub e_type: E_Type,
@@ -601,18 +658,9 @@ impl ELFHeader {
         let raw: &[u8] = &binary[mem::size_of::<ELFIdent>()..SIZE];
 
         // Now get our conversion functions to read numbers based on endianness
-        let u16_from_bytes = match ident.ei_data {
-            EI_Data::LittleEndian => u16::from_le_bytes,
-            EI_Data::BigEndian => u16::from_be_bytes,
-        };
-        let u32_from_bytes = match ident.ei_data {
-            EI_Data::LittleEndian => u32::from_le_bytes,
-            EI_Data::BigEndian => u32::from_be_bytes,
-        };
-        let u64_from_bytes = match ident.ei_data {
-            EI_Data::LittleEndian => u64::from_le_bytes,
-            EI_Data::BigEndian => u64::from_be_bytes,
-        };
+        let u16_from_bytes = get_num_from_bytes!(u16, ident.ei_data);
+        let u32_from_bytes = get_num_from_bytes!(u32, ident.ei_data);
+        let u64_from_bytes = get_num_from_bytes!(u64, ident.ei_data);
 
         // Finally we can create our header
         // We use 64bit values here as we can avoid duplicating everything for 32bit
@@ -702,5 +750,47 @@ impl fmt::Display for ELFHeader {
 impl fmt::Debug for ELFHeader {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.formatter(f)
+    }
+}
+
+#[cfg(test)]
+mod elf_header_tests {
+    use super::*;
+
+    #[test]
+    fn can_parse_basic_64_bit_little_endian_header() {
+        let raw = &[
+            0x7F, 0x45, 0x4C, 0x46, 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x03, 0x00, 0x3E, 0x00, 0x01, 0x00, 0x00, 0x00, 0xD0, 0x67, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x23,
+            0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x38, 0x00,
+            0x0D, 0x00, 0x40, 0x00, 0x1E, 0x00, 0x1D, 0x00,
+        ];
+        let ident = match ELFIdent::parse_from_buffer(&raw[0..16]) {
+            Ok(v) => v,
+            Err(_) => panic!("Unable to parse valid ident"),
+        };
+        let expected = ELFHeader {
+            ident,
+            e_type: E_Type::DYN,
+            e_machine: E_Machine::X86_64,
+            e_version: 1,
+            e_entry: 26576,
+            e_phoff: 64,
+            e_shoff: 140224,
+            e_flags: 0,
+            e_ehsize: 64,
+            e_phentsize: 56,
+            e_phnum: 13,
+            e_shentsize: 64,
+            e_shnum: 30,
+            e_shstrndx: 29,
+        };
+        let ident = match ELFIdent::parse_from_buffer(&raw[0..16]) {
+            Ok(v) => v,
+            Err(_) => panic!("Unable to parse valid ident"),
+        };
+        let header = ELFHeader::parse_from_buffer(raw, ident);
+        assert_eq!(expected, header);
     }
 }

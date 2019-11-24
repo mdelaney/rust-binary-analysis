@@ -92,18 +92,9 @@ impl Symbol {
         let raw: &[u8] = &binary[start_index..end_index];
 
         // Now get our conversion functions to read numbers based on endianness
-        let u16_from_bytes = match header.ident.ei_data {
-            EI_Data::LittleEndian => u16::from_le_bytes,
-            EI_Data::BigEndian => u16::from_be_bytes,
-        };
-        let u32_from_bytes = match header.ident.ei_data {
-            EI_Data::LittleEndian => u32::from_le_bytes,
-            EI_Data::BigEndian => u32::from_be_bytes,
-        };
-        let u64_from_bytes = match header.ident.ei_data {
-            EI_Data::LittleEndian => u64::from_le_bytes,
-            EI_Data::BigEndian => u64::from_be_bytes,
-        };
+        let u16_from_bytes = get_num_from_bytes!(u16, header.ident.ei_data);
+        let u32_from_bytes = get_num_from_bytes!(u32, header.ident.ei_data);
+        let u64_from_bytes = get_num_from_bytes!(u64, header.ident.ei_data);
 
         match header.ident.ei_class {
             EI_Class::ELF32 => Symbol {
