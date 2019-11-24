@@ -14,6 +14,8 @@ pub struct ELF {
     pub elf_header: elf_header::ELFHeader,
     pub program_headers: Vec<ProgramHeader>,
     pub section_headers: Vec<SectionHeader>,
+    pub dynamic_symbol_table: Vec<Symbol>,
+    pub symbol_table: Vec<Symbol>,
     pub data: Vec<u8>,
 }
 
@@ -56,20 +58,21 @@ pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) ->
 
     // TODO: you are here - time to get ELF symbols!!
     // TODO: do we have a .dynsym section? If so lets get the symbols
-    let dynsym = section::get_dynamic_symbols(&data, &section_headers, &elf_header)?;
+    let dynamic_symbol_table = section::get_dynamic_symbols(&data, &section_headers, &elf_header)?;
     println!("Dynamic Symbols");
-    println!("{}", get_symbol_print_string(&dynsym));
+    println!("{}", get_symbol_print_string(&dynamic_symbol_table));
     println!();
-    //    for sym in dynsym {
-    //        println!("{:#?}", sym);
-    //    }
+    let symbol_table = section::get_symbols(&data, &section_headers, &elf_header)?;
+    println!("Dynamic Symbols");
+    println!("{}", get_symbol_print_string(&symbol_table));
+    println!();
 
-    // TODO: do we have a .symtab section? If so lets get the symbols
-    //    .symtab is quite likely to not exist as it isn't needed for execution
     Ok(ELF {
         elf_header,
         program_headers,
         section_headers,
+        dynamic_symbol_table,
+        symbol_table,
         data,
     })
 }
