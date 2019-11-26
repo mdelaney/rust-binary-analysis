@@ -68,14 +68,36 @@ impl SymbolType {
     }
 }
 
+// Visibility is a 3 bit value
+#[allow(dead_code)]
+#[derive(Debug)]
+pub enum Visibility {
+    Default,   // 0 - Default symbol visibility rules
+    Internal,  // 1 - Processor specific hidden class
+    Hidden,    // 2 - Symbol unavailable in other modules
+    Protected, // 3 - Not preemptible not exportable
+}
+impl Visibility {
+    fn from_u8(value: u8) -> Visibility {
+        match value {
+            0 => Visibility::Default,
+            1 => Visibility::Internal,
+            2 => Visibility::Hidden,
+            3 => Visibility::Protected,
+            _ => Visibility::Default,
+        }
+    }
+}
+
 //  line 519 of elf.h
 pub struct Symbol {
-    pub name: u32,          // Symbol name (string table index)
-    pub address: u64,       // Symbol value
-    pub size: u64,          // Symbol size
-    pub info: u8,           // Symbol type and binding
-    pub other: u8,          // Symbol visibility
-    pub section_index: u16, // Section index
+    pub name: u32,               // Symbol name (string table index)
+    pub address: u64,            // Symbol value
+    pub size: u64,               // Symbol size
+    pub bind: Bind,              // high 4 bits from info field
+    pub symbol_type: SymbolType, // low 4 bits from info field
+    pub visibility: Visibility,  // Symbol visibility
+    pub section_index: u16,      // Section index
     pub name_string: String,
 }
 
@@ -104,15 +126,17 @@ impl Symbol {
                     name: u32_from_bytes(raw[0..4].try_into().unwrap()),
                     address: u64::from(u32_from_bytes(raw[4..8].try_into().unwrap())),
                     size: u64::from(u32_from_bytes(raw[8..12].try_into().unwrap())),
-                    info: raw[13],
-                    other: raw[14],
+                    bind: Bind::from_u8(raw[13] >> 4),
+                    symbol_type: SymbolType::from_u8(raw[13] & 0xf),
+                    visibility: Visibility::from_u8(raw[14] & 0x3),
                     section_index: u16_from_bytes(raw[15..16].try_into().unwrap()),
                     name_string: std::string::String::new(),
                 },
                 EI_Class::ELF64 => Symbol {
                     name: u32_from_bytes(raw[0..4].try_into().unwrap()),
-                    info: raw[4],
-                    other: raw[5],
+                    bind: Bind::from_u8(raw[4] >> 4),
+                    symbol_type: SymbolType::from_u8(raw[4] & 0xf),
+                    visibility: Visibility::from_u8(raw[5] & 0x3),
                     section_index: u16_from_bytes(raw[6..8].try_into().unwrap()),
                     address: u64_from_bytes(raw[8..16].try_into().unwrap()),
                     size: u64_from_bytes(raw[16..24].try_into().unwrap()),
@@ -132,8 +156,9 @@ impl Symbol {
                 "{:15}0x{:x?} {:?} {}",
                 "Size:", self.size, self.size, "(bytes)"
             ),
-            format!("{:15}{:?}", "Info:", self.info),
-            format!("{:15}{:?}", "Other:", self.other),
+            format!("{:15}{:?}", "Bind:", self.bind),
+            format!("{:15}{:?}", "Type:", self.symbol_type),
+            format!("{:15}{:?}", "Visibility:", self.visibility),
             format!("{:15}{:?}", "Section Index:", self.section_index),
         ];
         writeln!(f, "{}", strings.join("\n"))

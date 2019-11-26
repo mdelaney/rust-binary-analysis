@@ -4,7 +4,6 @@ pub mod section;
 pub mod symbol;
 pub mod utils;
 
-use crate::elf::section::get_dynamic_symbols;
 use crate::elf::symbol::Symbol;
 use program_header::ProgramHeader;
 use section::SectionHeader;
@@ -57,7 +56,6 @@ pub fn load_elf_from_buffer<T: std::io::Read + std::io::Seek>(buffer: &mut T) ->
     println!();
 
     // TODO: you are here - time to get ELF symbols!!
-    // TODO: do we have a .dynsym section? If so lets get the symbols
     let dynamic_symbol_table = section::get_dynamic_symbols(&data, &section_headers, &elf_header)?;
     println!("Dynamic Symbols");
     println!("{}", get_symbol_print_string(&dynamic_symbol_table));
@@ -104,18 +102,13 @@ fn get_section_headers_print_string(section_headers: &[SectionHeader]) -> String
 fn get_symbol_print_string(symbols: &[Symbol]) -> String {
     let mut strings: Vec<String> = vec![];
     strings.push(format!(
-        "{:25} {:18} {:18} {:4} {:4} {:6}",
-        "Name", "Address", "size", "Info", "Other", "SectionIdx",
+        "{:25} {:18} {:18} {:10} {:10} {:10} {:6}",
+        "Name", "Address", "size", "bind", "type", "Visibility", "SectionIdx",
     ));
     for i in symbols {
         strings.push(format!(
-            "{:<25} {:#018x} {:#018x} {:#04x} {:#04x} {:#06x}",
-            i.name_string,   //: String,
-            i.address,       //: u64,       // Symbol value
-            i.size,          //: u64,          // Symbol size
-            i.info,          //: u8,           // Symbol type and binding
-            i.other,         //: u8,          // Symbol visibility
-            i.section_index, //: u16, // Section index
+            "{:<25} {:#018x} {:#018x} {:10?} {:10?} {:10?} {:#06x}",
+            i.name_string, i.address, i.size, i.bind, i.symbol_type, i.visibility, i.section_index,
         ));
     }
     strings.join("\n")
