@@ -6,6 +6,7 @@ use super::symbol::Symbol;
 use super::utils::get_null_terminated_string_from_vec;
 use crate::elf::elf_header::ELFHeader;
 pub use section_header::SectionHeader;
+pub use utils::get_section_by_name;
 
 fn _get_symbols(
     data: &[u8],
