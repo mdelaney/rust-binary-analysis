@@ -10,7 +10,14 @@
       <sourceFolder url="file://$MODULE_DIR$/bfd2/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/bfd2/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/bfd2/benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/capstone-sys/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/capstone/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/capstone/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/capstone/benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/capstone/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/bfd2/target" />
+      <excludeFolder url="file://$MODULE_DIR$/capstone-sys/target" />
+      <excludeFolder url="file://$MODULE_DIR$/capstone/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

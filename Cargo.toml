@@ -5,5 +5,6 @@ authors = ["Matthew Delaney <matthew.l.delaney@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-capstone = "0.6.0"
+#capstone-sys = "0.6.0"
+capstone = { path = "capstone" }
 binload = { path = "./binload" }

@@ -19,6 +19,10 @@ pub struct SectionHeader {
 }
 
 impl SectionHeader {
+    pub fn contains_address(&self, address: u64) -> bool {
+        address > self.address && address < (self.address + self.size)
+    }
+
     pub fn get_data<'a>(&self, binary: &'a [u8]) -> &'a [u8] {
         let start = self.offset as usize;
         let end = start + self.size as usize;
