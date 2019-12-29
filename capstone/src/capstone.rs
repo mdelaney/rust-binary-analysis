@@ -1,5 +1,6 @@
 //use crate::capstone::Error::Detail;
 use crate::instruction::Instruction;
+
 use capstone_sys::bindings::*;
 use std::ffi::CStr;
 use std::mem;
@@ -22,6 +23,28 @@ pub enum Error {
     SkipData = 11,
     X86ATT = 12,
     X86Intel = 13,
+    Unknown,
+}
+impl Error {
+    fn from_u32(value: u32) -> Error {
+        match value {
+            0 => Error::Ok,
+            1 => Error::Mem,
+            2 => Error::Arch,
+            3 => Error::Handle,
+            4 => Error::Csh,
+            5 => Error::Mode,
+            6 => Error::Option,
+            7 => Error::Detail,
+            8 => Error::MemSetup,
+            9 => Error::Version,
+            10 => Error::Diet,
+            11 => Error::SkipData,
+            12 => Error::X86ATT,
+            13 => Error::X86Intel,
+            _ => Error::Unknown,
+        }
+    }
 }
 
 #[repr(u32)]
@@ -106,20 +129,20 @@ impl Capstone {
         }
     }
 
-    pub fn disassemble(&self, binary: &[u8], address: u64) -> Vec<Instruction> {
+    pub fn disassemble(&self, binary: &[u8], address: u64, count: usize) -> Vec<Instruction> {
         let mut insn: *mut cs_insn = unsafe { mem::zeroed() };
-        let count;
+        let instruction_count;
         unsafe {
-            count = cs_disasm(
+            instruction_count = cs_disasm(
                 self.csh,
                 binary.as_ptr(),
                 binary.len(),
                 address,
-                0,
+                count,
                 &mut insn,
             );
         }
-        let cs_instructions = unsafe { std::slice::from_raw_parts(insn, count) };
+        let cs_instructions = unsafe { std::slice::from_raw_parts(insn, instruction_count) };
         let mut result: Vec<Instruction> = vec![];
         for instruction in cs_instructions {
             result.push(Instruction::create_from_cs_insn(instruction))
@@ -148,6 +171,14 @@ impl Capstone {
                 .unwrap();
         }
         name
+    }
+
+    pub fn set_option(&self, option_type: OptionType, value: OptionValue) -> Error {
+        let ret_val;
+        unsafe {
+            ret_val = cs_option(self.csh, mem::transmute(option_type), value as usize);
+        }
+        Error::from_u32(ret_val as u32)
     }
 }
 

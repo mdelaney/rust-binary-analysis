@@ -1,5 +1,6 @@
 extern crate capstone_sys;
 
+pub mod arch;
 mod capstone;
 mod instruction;
 

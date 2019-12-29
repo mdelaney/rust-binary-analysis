@@ -28,7 +28,10 @@ fn get_linear_disassembly(cs: &Capstone, elf: &ELF) {
         .expect("there is no .text section in the executable");
     let text_binary = text_section.get_data(&elf.data);
 
-    let instructions = cs.disassemble(text_binary, text_section.address);
+    // TODO REM START
+    cs.set_option(OptionType::Detail, OptionValue::On);
+    // TODO REM END
+    let instructions = cs.disassemble(text_binary, text_section.address, 0);
     //        .disasm_all(text_binary, text_section.address)
     //        .expect("Failed to disassemeble");
 
@@ -36,40 +39,48 @@ fn get_linear_disassembly(cs: &Capstone, elf: &ELF) {
 
     for i in instructions.iter() {
         println!("{}", get_instruction_string(cs, &i));
+        if let Some(groups) = i.groups {
+            for group in groups {
+                println!(
+                    "{:?}",
+                    capstone::arch::x86::instruction::GroupType::from_u8(*group)
+                )
+            }
+        }
     }
 }
 
-//fn get_basic_recurisive_disassembly(cs: &Capstone, elf: &ELF) {
-//    let text_section = get_section_by_name(".text", &elf.section_headers)
-//        .expect("there is no .text section in the executable");
-//    let text_bytes = text_section.get_data(&elf.data);
-//    let mut queue: VecDeque<u64> = VecDeque::new();
-//
-//    if text_section.contains_address(elf.elf_header.e_entry) {
-//        queue.push_back(elf.elf_header.e_entry);
-//    }
-//
-//    // TODO: iterate over symbols and add those addresses if they are in the .text section too
-//
-//    let mut seen: HashMap<u64, bool> = HashMap::new();
-//    while (!queue.is_empty()) {
-//        let address = queue
-//            .pop_front()
-//            .expect("but we just tested that this wasn't empty");
-//        if seen.contains_key(&address) {
-//            continue;
-//        }
-//
-//        let offset = address - text_section.address;
-//        loop {
-//            let instructions = cs.disasm_count(text_bytes, address, 1).unwrap_or(break);
-//            for instruction in instructions.iter() {
-//                //                if is_cs_cflow_ins(cs, ins) {}
-//            }
-//        }
-//    }
-//}
-//
+fn get_basic_recurisive_disassembly(cs: &Capstone, elf: &ELF) {
+    let text_section = get_section_by_name(".text", &elf.section_headers)
+        .expect("there is no .text section in the executable");
+    let text_bytes = text_section.get_data(&elf.data);
+    let mut queue: VecDeque<u64> = VecDeque::new();
+
+    if text_section.contains_address(elf.elf_header.e_entry) {
+        queue.push_back(elf.elf_header.e_entry);
+    }
+
+    // TODO: iterate over symbols and add those addresses if they are in the .text section too
+
+    let mut seen: HashMap<u64, bool> = HashMap::new();
+    while !queue.is_empty() {
+        let address = queue
+            .pop_front()
+            .expect("but we just tested that this wasn't empty");
+        if seen.contains_key(&address) {
+            continue;
+        }
+
+        let offset = address - text_section.address;
+        loop {
+            let instructions = cs.disassemble(text_bytes, address, 1);
+            for instruction in instructions.iter() {
+                //                if is_cs_cflow_ins(cs, ins) {}
+            }
+        }
+    }
+}
+
 //use capstone-sys::instruction::InsnGroupType;
 //fn is_cs_cflow_group(group: capstone-sys::InsnGroupIdInt) -> bool {
 //    match group {

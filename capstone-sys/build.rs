@@ -23,7 +23,10 @@ fn main() {
         //        .rustified_enum("cs_err|cs_group_type|cs_opt_value")
         .rustified_enum(".*")
         .whitelist_function("cs_.*")
-        .whitelist_type("cs_.*")
+        .whitelist_type(".*")
+        //        .whitelist_type("cs_.*")
+        .whitelist_type(".*_arm(64)?_.*")
+        .whitelist_type(".*_x86_.*")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         //.parse_callbacks(Box::new(bindgen::CargoCallbacks))
@@ -33,8 +36,10 @@ fn main() {
         .expect("Unable to generate bindings");
 
     // Write the bindings to the $OUT_DIR/bindings.rs file.
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let _out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+
     bindings
-        .write_to_file(out_path.join("bindings.rs"))
+        //        .write_to_file(out_path.join("bindings.rs"))
+        .write_to_file("src/bindings.rs")
         .expect("Couldn't write bindings!");
 }
