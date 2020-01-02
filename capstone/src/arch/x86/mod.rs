@@ -1,8 +1,5 @@
 pub mod instruction;
 
-use capstone_sys::bindings::cs_detail;
-use instruction::GroupType;
-
 // maps to x86_reg
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -243,39 +240,4 @@ pub enum Register {
     R14W = 232,
     R15W = 233,
     ENDING = 234,
-}
-
-#[derive(Clone)]
-pub struct Detail {
-    //    pub regs_read: [u8; 12usize],
-    //    pub regs_read_count: u8,
-    //    pub regs_write: [u8; 20usize],
-    //    pub regs_write_count: u8,
-    pub groups: Vec<GroupType>,
-    //    pub __bindgen_anon_1: cs_detail__bindgen_ty_1,
-}
-impl Detail {
-    pub fn create_from_cs_detail(detail: &cs_detail) -> Detail {
-        /* NOTE TO SELF:
-        For arch specific stuff here, can probably just use macros to obtain functions that will
-        convert groups or register numbers to something more generally useful than ints
-        */
-        // first get groups
-
-        // TODO: this doesn't do anything with arch specific groups yet
-        let mut groups: Vec<GroupType> = vec![];
-        for i in 0..detail.groups_count as usize {
-            match <GroupType>::from_u8(detail.groups[i]) {
-                Some(v) => groups.push(v),
-                None => (),
-            };
-        }
-        Detail {
-            //            regs_read: detail.regs_read,
-            //            regs_read_count: detail.regs_read_count,
-            //            regs_write: detail.regs_write,
-            //            regs_write_count: detail.regs_write_count,
-            groups: groups,
-        }
-    }
 }

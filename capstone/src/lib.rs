@@ -15,7 +15,7 @@ mod tests {
         const X86_CODE: &'static [u8] =
             b"\x55\x48\x8b\x05\xb8\x13\x00\x00\xe9\x14\x9e\x08\x00\x45\x31\xe4";
         let cs = Capstone::new(Architecture::X86, Endian::LittleEndian);
-        let insn = cs.disassemble(X86_CODE);
+        let insn = cs.disassemble(X86_CODE, 0x1000, 0);
         for i in insn {
             println!("{} {} {}", i.id, i.address, i.size);
         }

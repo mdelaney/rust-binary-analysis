@@ -49,6 +49,7 @@ pub struct Instruction<'a> {
     pub groups: Option<&'a [u8]>,
     pub regs_read: Option<&'a [u8]>,
     pub regs_write: Option<&'a [u8]>,
+    pub detail: Option<&'a capstone_sys::bindings::cs_detail__bindgen_ty_1>,
 }
 impl<'a> Instruction<'a> {
     pub fn create_from_cs_insn(insn: &'a cs_insn) -> Instruction<'a> {
@@ -64,14 +65,17 @@ impl<'a> Instruction<'a> {
         let groups: Option<&[u8]>;
         let regs_read: Option<&[u8]>;
         let regs_write: Option<&[u8]>;
+        let extra_detail: Option<&capstone_sys::bindings::cs_detail__bindgen_ty_1>;
         if let Some(detail) = unsafe { insn.detail.as_ref() } {
             groups = Some(&detail.groups[..detail.groups_count as usize]);
             regs_read = Some(&detail.regs_read[..detail.regs_read_count as usize]);
             regs_write = Some(&detail.regs_write[..detail.regs_write_count as usize]);
+            extra_detail = Some(&detail.__bindgen_anon_1);
         } else {
             groups = None;
             regs_read = None;
             regs_write = None;
+            extra_detail = None;
         }
 
         Instruction {
@@ -84,6 +88,7 @@ impl<'a> Instruction<'a> {
             groups,
             regs_read,
             regs_write,
+            detail: extra_detail,
         }
     }
 }

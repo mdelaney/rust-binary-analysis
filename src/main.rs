@@ -23,6 +23,7 @@ fn get_instruction_string(cs: &Capstone, instruction: &Instruction) -> String {
     )
 }
 
+// This just dumps the disassembled instructions to stdout
 fn get_linear_disassembly(cs: &Capstone, elf: &ELF) {
     let text_section = get_section_by_name(".text", &elf.section_headers)
         .expect("there is no .text section in the executable");
@@ -42,9 +43,9 @@ fn get_linear_disassembly(cs: &Capstone, elf: &ELF) {
         if let Some(groups) = i.groups {
             for group in groups {
                 println!(
-                    "{:?}",
+                    "\t{:?}",
                     capstone::arch::x86::instruction::GroupType::from_u8(*group)
-                )
+                );
             }
         }
     }
@@ -64,41 +65,108 @@ fn get_basic_recurisive_disassembly(cs: &Capstone, elf: &ELF) {
 
     let mut seen: HashMap<u64, bool> = HashMap::new();
     while !queue.is_empty() {
-        let address = queue
+        let mut address = queue
             .pop_front()
             .expect("but we just tested that this wasn't empty");
         if seen.contains_key(&address) {
             continue;
         }
 
-        let offset = address - text_section.address;
+        let mut pc = 0 as usize;
+        let n = text_bytes.len();
         loop {
-            let instructions = cs.disassemble(text_bytes, address, 1);
-            for instruction in instructions.iter() {
-                //                if is_cs_cflow_ins(cs, ins) {}
+            let insn = &cs.disassemble(&text_bytes[pc..], address + pc as u64, 1)[0];
+            pc += insn.size as usize;
+            if insn.id == arch::x86::instruction::InstructionId::INVALID as u32 || insn.size == 0 {
+                break;
+            }
+
+            seen.insert(insn.address, true);
+            println!("{}", get_instruction_string(cs, &insn));
+
+            if is_cs_cflow_ins(&insn) {
+                let target: u64 = get_cs_ins_immediate_target(cs, insn);
+                // FIXME: we jump to the .plt section for __libc_start_main but because this is not
+                // in the text section we just skip. If we followed, we'd get a simple jump
+                if target != 0
+                    && !seen.contains_key(&target)
+                    && text_section.contains_address(target)
+                {
+                    queue.push_back(target);
+                    println!(" -> new target {:#016x}", target);
+                }
+                if is_cs_unconditional_cflow_ins(&insn) {
+                    break;
+                }
+            } else if insn.id == arch::x86::instruction::InstructionId::HLT as u32 {
+                break;
             }
         }
+        println!("-------------------");
     }
 }
 
-//use capstone-sys::instruction::InsnGroupType;
-//fn is_cs_cflow_group(group: capstone-sys::InsnGroupIdInt) -> bool {
-//    match group {
-//        InsnGroupType::CS_GRP_JUMP => true,
-//
-//        _ => false,
-//    }
-//}
-//
-//fn is_cs_cflow_ins(cs: &Capstone, instruction: &Insn) -> bool {
-//    let detail = match cs.insn_detail(instruction) {
-//        Ok(v) => v,
-//        Err(_) => return false,
-//    };
-//    for group in detail.groups() {}
-//    // TODO
-//    true
-//}
+/// Returns bool indicating if the group id is a control flow group
+fn is_cs_cflow_group(group: u8) -> bool {
+    use arch::x86::instruction::GroupType;
+    match GroupType::from_u8(group) {
+        GroupType::JUMP => true,
+        GroupType::CALL => true,
+        GroupType::RET => true,
+        GroupType::IRET => true,
+        _ => false,
+    }
+}
+
+/// Returns bool indicating if the instruction is a control flow instruction
+fn is_cs_cflow_ins(insn: &Instruction) -> bool {
+    let groups = match insn.groups {
+        Some(v) => v,
+        None => return false,
+    };
+    for group in groups {
+        if is_cs_cflow_group(*group) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Returns bool indicating if the instruction is a unconditional control flow instruction
+fn is_cs_unconditional_cflow_ins(insn: &Instruction) -> bool {
+    use arch::x86::instruction::InstructionId;
+    match InstructionId::from_u32(insn.id) {
+        InstructionId::JMP => true,
+        InstructionId::LJMP => true,
+        InstructionId::RET => true,
+        InstructionId::RETF => true,
+        InstructionId::RETFQ => true,
+        _ => false,
+    }
+}
+
+fn get_cs_ins_immediate_target(cs: &Capstone, insn: &Instruction) -> u64 {
+    let groups = match insn.groups {
+        Some(v) => v,
+        None => return 0,
+    };
+    let detail = match insn.detail {
+        Some(v) => v,
+        None => return 0,
+    };
+    for group in groups {
+        if is_cs_cflow_group(*group) {
+            for i in (0..unsafe { detail.x86.op_count }) {
+                let op = unsafe { detail.x86.operands[i as usize] };
+                if op.type_ as u8 == 2 {
+                    //arch::x86::instruction::Operand::IMM {
+                    return unsafe { op.__bindgen_anon_1.imm } as u64;
+                }
+            }
+        }
+    }
+    0
+}
 
 fn main() {
     // get raw binary
@@ -116,4 +184,5 @@ fn main() {
 
     // do disassembly
     get_linear_disassembly(&cs, &elf);
+    get_basic_recurisive_disassembly(&cs, &elf);
 }

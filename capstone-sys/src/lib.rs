@@ -3,6 +3,6 @@
 #![allow(non_snake_case)]
 #![allow(improper_ctypes)]
 
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+include!("bindings.rs");
 
 pub mod bindings;
