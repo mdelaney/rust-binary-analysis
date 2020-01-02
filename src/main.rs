@@ -61,6 +61,10 @@ fn get_basic_recurisive_disassembly(cs: &Capstone, elf: &ELF) {
         queue.push_back(elf.elf_header.e_entry);
     }
 
+    for address in get_symbols_in_text_section(&elf) {
+        queue.push_back(address);
+    }
+
     // TODO: iterate over symbols and add those addresses if they are in the .text section too
 
     let mut seen: HashMap<u64, bool> = HashMap::new();
@@ -72,11 +76,14 @@ fn get_basic_recurisive_disassembly(cs: &Capstone, elf: &ELF) {
             continue;
         }
 
-        let mut pc = 0 as usize;
+        let mut pc = (address - text_section.address) as usize;
         let n = text_bytes.len();
         loop {
             let insn = &cs.disassemble(&text_bytes[pc..], address + pc as u64, 1)[0];
             pc += insn.size as usize;
+            if pc >= text_bytes.len() {
+                break;
+            }
             if insn.id == arch::x86::instruction::InstructionId::INVALID as u32 || insn.size == 0 {
                 break;
             }
@@ -168,6 +175,19 @@ fn get_cs_ins_immediate_target(cs: &Capstone, insn: &Instruction) -> u64 {
     0
 }
 
+fn get_symbols_in_text_section(elf: &ELF) -> Vec<u64> {
+    let mut result: Vec<u64> = vec![];
+    let text_section = get_section_by_name(".text", &elf.section_headers)
+        .expect("there is no .text section in the executable");
+
+    for symbol in &elf.symbol_table {
+        if text_section.contains_address(symbol.address) {
+            result.push(symbol.address);
+        }
+    }
+    result
+}
+
 fn main() {
     // get raw binary
     let elf = load_from_file("/home/mdelaney/infosec/reverse/crackmes/IOLI/bin-linux/crackme0x00");
@@ -183,6 +203,6 @@ fn main() {
     //        .expect("Failed to create Capstone object");
 
     // do disassembly
-    get_linear_disassembly(&cs, &elf);
+    //    get_linear_disassembly(&cs, &elf);
     get_basic_recurisive_disassembly(&cs, &elf);
 }
