@@ -1,4 +1,4 @@
-#![allow(overlapping_patterns)]
+#![allow(overlapping_range_endpoints)]
 
 use std::fmt;
 

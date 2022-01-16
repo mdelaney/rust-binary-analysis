@@ -1,6 +1,6 @@
 // TODO - remove allow dead code
 #![allow(dead_code)]
-#![allow(overlapping_patterns)]
+#![allow(overlapping_range_endpoints)]
 
 use std::convert::TryInto;
 use std::fmt;

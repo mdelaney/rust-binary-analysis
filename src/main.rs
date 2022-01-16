@@ -69,7 +69,7 @@ fn get_basic_recurisive_disassembly(cs: &Capstone, elf: &ELF) {
 
     let mut seen: HashMap<u64, bool> = HashMap::new();
     while !queue.is_empty() {
-        let mut address = queue
+        let address = queue
             .pop_front()
             .expect("but we just tested that this wasn't empty");
         if seen.contains_key(&address) {
@@ -77,7 +77,6 @@ fn get_basic_recurisive_disassembly(cs: &Capstone, elf: &ELF) {
         }
 
         let mut pc = (address - text_section.address) as usize;
-        let n = text_bytes.len();
         loop {
             let insn = &cs.disassemble(&text_bytes[pc..], address + pc as u64, 1)[0];
             pc += insn.size as usize;
@@ -163,7 +162,7 @@ fn get_cs_ins_immediate_target(cs: &Capstone, insn: &Instruction) -> u64 {
     };
     for group in groups {
         if is_cs_cflow_group(*group) {
-            for i in (0..unsafe { detail.x86.op_count }) {
+            for i in 0..unsafe { detail.x86.op_count } {
                 let op = unsafe { detail.x86.operands[i as usize] };
                 if op.type_ as u8 == 2 {
                     //arch::x86::instruction::Operand::IMM {
@@ -190,7 +189,7 @@ fn get_symbols_in_text_section(elf: &ELF) -> Vec<u64> {
 
 fn main() {
     // get raw binary
-    let elf = load_from_file("/home/mdelaney/infosec/reverse/crackmes/IOLI/bin-linux/crackme0x00");
+    let elf = load_from_file("/Users/mdelaney/Development/binary-analysis/crackmes/IOLI/bin-linux/crackme0x00");
 
     //    capstone::
     // init Capstone

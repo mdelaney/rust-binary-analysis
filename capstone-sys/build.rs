@@ -6,7 +6,9 @@ use std::path::PathBuf;
 fn main() {
     // Tell cargo to tell rustc to link the system bzip2
     // shared library.
+    //println!("cargo:rustc-link-lib=capstone");
     println!("cargo:rustc-link-lib=capstone");
+    println!("cargo:rustc-link-search=/opt/homebrew/lib");
 
     // Tell cargo to invalidate the built crate whenever the wrapper changes
     println!("cargo:rerun-if-changed=wrapper.h");
@@ -17,7 +19,12 @@ fn main() {
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
-        .header("/usr/include/capstone/capstone.h")
+
+        // If I install via homebrew it's in a different place...
+        // TODO: this is obviously something that needs to be improved here
+        // .header("/usr/include/capstone/capstone.h")
+        .header("/opt/homebrew/include/capstone/capstone.h")
+
         .disable_name_namespacing()
         .impl_debug(true)
         //        .rustified_enum("cs_err|cs_group_type|cs_opt_value")
