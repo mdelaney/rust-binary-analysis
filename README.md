@@ -1,9 +1,9 @@
 # Rust Binary Analysis
 ## There are plenty of great binary analysis tools out there, so why create this?
 Quite simply, I want to learn binary analysis and Rust. That and I was inspired by a PoC||GTFO article 
-"Buiuld Your Own Fucking Birdfeeder" by Manul Laphroaig. This is my birdfeeder (that will hopefully
+"Build Your Own Fucking Birdfeeder" by Manul Laphroaig. This is my birdfeeder (that will hopefully
 become something others will find useful in time)
-> What I cann't create, I do not understand. (Richard Feynman)
+> What I can't create, I do not understand. (Richard Feynman)
 
 This readme will be a kind of living document that I'll update as pieces get implemented or improved.
 
@@ -16,7 +16,7 @@ After implementing some basic ELF support, I moved on to writing a wrapper for C
 use an existing wrapper? To build my own birdfeeder and learn a bit about wrapping C libraries :-P.
 
 I've been working through the book "Practical Binary Analysis" by Dennis Andriesse and wanted to
-implement the Capstone exercises in Rust (which has lead me down a number of rabbit holes that
+implement the Capstone exercises in Rust (which has led me down a number of rabbit holes that
 have taught me quite a bit so far). I've gotten this much working.
 
 ## What will I work on next?
