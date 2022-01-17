@@ -13,18 +13,21 @@ fn main() {
     // Tell cargo to invalidate the built crate whenever the wrapper changes
     println!("cargo:rerun-if-changed=wrapper.h");
 
+    #[cfg(target_os = "linux")]
+    let capstone_header = "/usr/include/capstone/capstone.h";
+
+    // this assumes the default location when installing capstone with brew, probably
+    // this can/should be done differently
+    #[cfg(target_os = "macos")]
+    let capstone_header = "/opt/homebrew/include/capstone/capstone.h";
+
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for
     // the resulting bindings.
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
-
-        // If I install via homebrew it's in a different place...
-        // TODO: this is obviously something that needs to be improved here
-        // .header("/usr/include/capstone/capstone.h")
-        .header("/opt/homebrew/include/capstone/capstone.h")
-
+        .header(capstone_header)
         .disable_name_namespacing()
         .impl_debug(true)
         //        .rustified_enum("cs_err|cs_group_type|cs_opt_value")

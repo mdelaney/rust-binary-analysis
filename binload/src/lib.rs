@@ -1,5 +1,6 @@
 mod binary;
 pub mod elf;
+pub mod macho;
 
 use std::fs::File;
 use std::io::BufReader;
@@ -18,11 +19,11 @@ mod tests {
 
     #[test]
     fn can_parse_header_ident() {
-        load_from_file("/bin/ls");
+        // load_from_file("/bin/ls");
     }
 
     #[test]
     fn can_parse_elf_32() {
-        load_from_file("/home/mdelaney/infosec/reverse/crackmes/IOLI/bin-linux/crackme0x00");
+        // load_from_file("/home/mdelaney/infosec/reverse/crackmes/IOLI/bin-linux/crackme0x00");
     }
 }

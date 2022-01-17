@@ -1,3 +1,6 @@
+// TODO - remove allow dead code
+#![allow(dead_code)]
+
 extern crate binload;
 extern crate capstone;
 
