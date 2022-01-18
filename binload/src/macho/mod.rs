@@ -1,4 +1,5 @@
 pub mod header;
+pub mod fat;
 
 pub struct MACHO {
     pub header: header::Header,
