@@ -411,7 +411,7 @@ mod macho_header_tests {
     use super::*;
 
     #[test]
-    fn can_parse_basic_ident_section() {
+    fn can_parse_basic_ident_section_x86() {
         let raw = [
             0xcf, 0xfa, 0xed, 0xfe, // magic bytes
             0x07, 0x00, 0x00, 0x01, // cpu_type
@@ -440,4 +440,35 @@ mod macho_header_tests {
             Err(_) => assert!(false),
         };
     }
+
+    // #[test]
+    // fn can_parse_basic_ident_section_arm64() {
+    //     let raw = [
+    //         0xca, 0xfe, 0xba, 0xbe,
+    //         0x00, 0x00, 0x00, 0x02,
+    //         0x01, 0x00, 0x00, 0x07,
+    //         0x00, 0x00, 0x00, 0x03,
+    //         0x00, 0x00, 0x40, 0x00,
+    //         0x00, 0x01, 0x1c, 0x60,
+    //         0x00, 0x00, 0x00, 0x0e,
+    //         0x01, 0x00, 0x00, 0x0c,
+    //     ];
+    //     let expected = Header {
+    //         magic: [0xcf, 0xfa, 0xed, 0xfe],
+    //         endian: Endian::LittleEndian,
+    //         arch_size: ArchSize::_64,
+    //         cpu_type: CpuType::X86_64,
+    //         cpu_subtype: 0x03,
+    //         file_type: FileType::Execute,
+    //         flags: Flags::from_bits(0x200085).unwrap(),
+    //         number_of_commands: 0x13,
+    //         size_of_commands: 0x710,
+    //         reserved: 0,
+    //     };
+    //     let header = Header::parse_from_buffer(&raw);
+    //     match header {
+    //         Ok(v) => assert_eq!(v, expected),
+    //         Err(_) => assert!(false),
+    //     };
+    // }
 }
